@@ -214,6 +214,22 @@ const text = {
   episodes: ['Episódios', 'Episodes', 'Episodios'],
   chapters: ['Capítulos', 'Chapters', 'Capítulos'],
   mediaStatus: ['Status', 'Status', 'Estado'],
+  searchResults: ['Resultados da pesquisa', 'Search results', 'Resultados de la búsqueda'],
+  searchSummary: [
+    '{count} resultados nesta página · Página {page}',
+    '{count} results on this page · Page {page}',
+    '{count} resultados en esta página · Página {page}',
+  ],
+  selectMedia: [
+    'Escolha uma obra para abrir a ficha',
+    'Choose a title to open its details',
+    'Elige una obra para abrir su ficha',
+  ],
+  ownSearchOnly: [
+    'Só quem iniciou a pesquisa pode usar este seletor ou navegar pelas páginas.',
+    'Only the person who started this search can select a title or change pages.',
+    'Solo quien inició la búsqueda puede seleccionar una obra o cambiar de página.',
+  ],
   mediaGenres: ['Gêneros', 'Genres', 'Géneros'],
   mediaSynopsis: ['Sinopse', 'Synopsis', 'Sinopsis'],
   mediaRelations: ['Relações', 'Relations', 'Relaciones'],

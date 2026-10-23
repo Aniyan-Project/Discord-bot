@@ -11,6 +11,8 @@ import {
   type AutocompleteInteraction,
   type ChatInputCommandInteraction,
   type GuildTextBasedChannel,
+  type ButtonInteraction,
+  type StringSelectMenuInteraction,
 } from 'discord.js'
 import type { Config } from './config.js'
 import type { Store } from './store.js'
@@ -129,6 +131,11 @@ export class BotRuntime {
     this.client.on(Events.InteractionCreate, async (interaction) => {
       if (interaction.isChatInputCommand()) await this.slash(interaction)
       else if (interaction.isAutocomplete()) await this.autocomplete(interaction)
+      else if (
+        (interaction.isStringSelectMenu() || interaction.isButton()) &&
+        /^media:(select|prev|next):/.test(interaction.customId)
+      )
+        await this.searchInteraction(interaction)
       else if (interaction.isButton() && /^(confirm|cancel):/.test(interaction.customId)) {
         const [action, token] = interaction.customId.split(':')
         if (!token) return
@@ -216,6 +223,36 @@ export class BotRuntime {
       if (interaction.deferred || interaction.replied)
         await interaction.editReply({ content, embeds: [], components: [] }).catch(() => undefined)
       else await interaction.reply({ content, flags: MessageFlags.Ephemeral }).catch(() => undefined)
+    }
+  }
+  private async searchInteraction(
+    interaction: ButtonInteraction | StringSelectMenuInteraction,
+  ): Promise<void> {
+    let locale = normalizeLocale(interaction.locale)
+    try {
+      const [, action, token] = /^media:(select|prev|next):([\w-]+)$/.exec(interaction.customId) ?? []
+      if (!token || !action || (action === 'select') !== interaction.isStringSelectMenu())
+        throw new AppError(400, 'invalidInput')
+      const context = this.engine.searchContext(token, interaction.user.id)
+      locale = this.engine.settings(context).locale
+      await interaction.deferUpdate()
+      const result = await this.engine.interactSearch(
+        token,
+        {
+          ...context,
+          guildId: interaction.guildId ?? undefined,
+          channelId: interaction.channelId,
+          parentChannelId: interaction.channel?.isThread() ? interaction.channel.parentId : null,
+        },
+        action as 'select' | 'prev' | 'next',
+        interaction.isStringSelectMenu() ? interaction.values[0] : undefined,
+      )
+      await interaction.editReply(payload(result))
+    } catch (error) {
+      const response = { content: errorMessage(error, locale), flags: MessageFlags.Ephemeral as const }
+      if (interaction.deferred || interaction.replied)
+        await interaction.followUp(response).catch(() => undefined)
+      else await interaction.reply(response).catch(() => undefined)
     }
   }
   private async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

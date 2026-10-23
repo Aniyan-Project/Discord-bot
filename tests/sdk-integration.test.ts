@@ -102,6 +102,9 @@ test('published SDK sends typed catalog queries and filters adult media', async 
     assert.equal((calls[0]!.init!.headers as Record<string, string>).authorization, undefined)
     await api.search('test', 'ANIME')
     assert.equal(calls.length, 1)
+    await api.search('test', 'ANIME', 0, 5)
+    assert.equal(calls.length, 2, 'A five-item Discord page must not reuse a twelve-item dashboard page')
+    assert.ok(Object.values(JSON.parse(calls[1]!.init!.body as string).variables).includes(5))
   } finally {
     globalThis.fetch = original
     store.close()

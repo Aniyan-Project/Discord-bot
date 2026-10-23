@@ -97,7 +97,7 @@ export class BranilistService {
       throw new AppError(502, 'requestFailed')
     }
   }
-  async search(search = '', type?: 'ANIME' | 'MANGA', offset = 0) {
+  async search(search = '', type?: 'ANIME' | 'MANGA', offset = 0, first = 12) {
     if (this.config.DEMO_MODE) {
       const items = demoMedia.filter(
         (m) =>
@@ -105,17 +105,17 @@ export class BranilistService {
           Object.values(m.title).some((t) => t?.toLowerCase().includes(search.toLowerCase())),
       )
       return {
-        nodes: items.slice(offset, offset + 12),
-        pageInfo: { limit: 12, offset, hasNextPage: items.length > offset + 12 },
+        nodes: items.slice(offset, offset + first),
+        pageInfo: { limit: first, offset, hasNextPage: items.length > offset + first },
       }
     }
-    const key = JSON.stringify([search, type, offset])
+    const key = JSON.stringify([search, type, offset, first])
     const cached = this.cache.get(key)
     if (cached && cached.until > Date.now()) return cached.value
     const result = await this.withErrors(() =>
       this.catalog.query({
         mediaPage: {
-          __args: { search: search || undefined, type, offset, first: 12 },
+          __args: { search: search || undefined, type, offset, first },
           nodes: mediaFields,
           pageInfo: { limit: true, offset: true, hasNextPage: true },
         },

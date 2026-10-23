@@ -94,7 +94,7 @@ test('a selected manga cannot be displayed through the anime command', async () 
   }
 })
 
-test('free-text searches with multiple matches keep the current search layout pending approval', async () => {
+test('free-text searches with multiple matches use the approved Components V2 search layout', async () => {
   const cfg = config(),
     store = new Store(':memory:', cfg.ENCRYPTION_KEY)
   class FakeAPI extends BranilistService {
@@ -114,8 +114,9 @@ test('free-text searches with multiple matches keep the current search layout pe
       ['Frieren'],
       ctx,
     )
-    assert.ok(result.embeds?.length)
-    assert.equal(result.componentsV2, undefined)
+    assert.ok(result.componentsV2?.length)
+    assert.equal(result.embeds, undefined)
+    assert.match(JSON.stringify(result), /Resultados da pesquisa/)
   } finally {
     store.close()
   }

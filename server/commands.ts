@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { escapeMarkdown, type APIEmbed, type APIContainerComponent } from 'discord.js'
-import { mediaDetailComponents, selectedMediaId } from './media-message.js'
+import {
+  mediaDetailComponents,
+  mediaSearchComponents,
+  selectedMediaId,
+  SEARCH_PAGE_SIZE,
+} from './media-message.js'
 import {
   commandIds,
   defaultSettings,
@@ -45,6 +50,16 @@ interface Pending {
   until: number
   locale: Locale
 }
+interface SearchSession {
+  context: Invocation
+  command: 'anime' | 'manga'
+  query: string
+  offset: number
+  ids: string[]
+  hasNextPage: boolean
+  until: number
+  busy: boolean
+}
 const idSchema = z.string().regex(/^[1-9]\d{0,19}$/)
 const statusSchema = z.enum(['PLANNING', 'CURRENT', 'COMPLETED', 'PAUSED', 'DROPPED'])
 export function cleanText(value: string, limit = 500): string {
@@ -62,6 +77,8 @@ export function cleanText(value: string, limit = 500): string {
 export class CommandEngine {
   private readonly cooldowns = new Cooldowns()
   private readonly pending = new Map<string, Pending>()
+  private readonly searches = new Map<string, SearchSession>()
+  private readonly searchCooldowns = new Cooldowns()
   constructor(
     private readonly config: Config,
     private readonly store: Store,
@@ -153,6 +170,94 @@ export class CommandEngine {
       link: { label: t(settings.locale, 'openBranilist'), url: mediaURL(items[0]!) },
     }
   }
+  private searchResults(
+    items: MediaCard[],
+    query: string,
+    command: 'anime' | 'manga',
+    ctx: Invocation,
+    settings: GuildSettings,
+    offset: number,
+    remoteHasNext: boolean,
+    until = Date.now() + 5 * 60000,
+  ): CommandResult {
+    for (const [key, value] of this.searches) if (value.until <= Date.now()) this.searches.delete(key)
+    if (this.searches.size >= 5000) throw new AppError(429, 'rateLimited')
+    const token = randomToken()
+    const visible = items
+      .filter((m) => !m.isAdult && m.type === (command === 'anime' ? 'ANIME' : 'MANGA'))
+      .slice(0, SEARCH_PAGE_SIZE)
+    const hasNextPage =
+      offset + SEARCH_PAGE_SIZE <= 10000 && (items.length > SEARCH_PAGE_SIZE || remoteHasNext)
+    const componentsV2 = mediaSearchComponents(visible, settings, { query, offset, token, hasNextPage })
+    this.searches.set(token, {
+      context: { ...ctx },
+      command,
+      query,
+      offset,
+      ids: visible.map((m) => m.id),
+      hasNextPage,
+      until,
+      busy: false,
+    })
+    return { componentsV2 }
+  }
+  searchContext(token: string, userId: string): Invocation {
+    const session = this.searches.get(token)
+    if (!session || session.until <= Date.now()) throw new AppError(410, 'expired')
+    if (session.context.userId !== userId) throw new AppError(403, 'ownSearchOnly')
+    return { ...session.context }
+  }
+  async interactSearch(
+    token: string,
+    ctx: Invocation,
+    action: 'select' | 'prev' | 'next',
+    value?: string,
+  ): Promise<CommandResult> {
+    const original = this.searchContext(token, ctx.userId)
+    const session = this.searches.get(token)!
+    if (ctx.guildId !== original.guildId || ctx.channelId !== original.channelId)
+      throw new AppError(403, 'forbidden')
+    const current = { ...original, parentChannelId: ctx.parentChannelId }
+    const settings = this.enforce(current, session.command, false)
+    if (session.busy || this.searchCooldowns.check(`${original.guildId ?? 'dm'}:${ctx.userId}`, 1))
+      throw new AppError(429, 'rateLimited')
+    session.busy = true
+    try {
+      let result: CommandResult
+      if (action === 'select') {
+        const id = selectedMediaId(value ?? '')
+        if (!id || !session.ids.includes(id)) throw new AppError(400, 'invalidInput')
+        const media = await this.api.mediaDetail(id)
+        if (media.type !== (session.command === 'anime' ? 'ANIME' : 'MANGA'))
+          throw new AppError(404, 'notFound')
+        result = { componentsV2: mediaDetailComponents(media, settings) }
+      } else {
+        if ((action === 'prev' && session.offset === 0) || (action === 'next' && !session.hasNextPage))
+          throw new AppError(400, 'invalidInput')
+        const offset = session.offset + (action === 'prev' ? -SEARCH_PAGE_SIZE : SEARCH_PAGE_SIZE)
+        const page = await this.api.search(
+          session.query,
+          session.command === 'anime' ? 'ANIME' : 'MANGA',
+          offset,
+          SEARCH_PAGE_SIZE,
+        )
+        result = this.searchResults(
+          page.nodes,
+          session.query,
+          session.command,
+          current,
+          settings,
+          offset,
+          page.pageInfo.hasNextPage,
+          session.until,
+        )
+      }
+      this.searches.delete(token)
+      return result
+    } finally {
+      session.busy = false
+    }
+  }
   private confirmation(ctx: Invocation, command: 'remove' | 'disconnect', mediaId?: string): CommandResult {
     for (const [key, value] of this.pending) if (value.until <= Date.now()) this.pending.delete(key)
     if (this.pending.size > 5000) throw new AppError(429, 'rateLimited')
@@ -210,11 +315,19 @@ export class CommandEngine {
             result = { componentsV2: mediaDetailComponents(media, settings) }
             break
           }
-          const items = (await this.api.search(query, command === 'anime' ? 'ANIME' : 'MANGA')).nodes
+          const page = await this.api.search(
+            query,
+            command === 'anime' ? 'ANIME' : 'MANGA',
+            0,
+            SEARCH_PAGE_SIZE,
+          )
+          const items = page.nodes
           result =
-            items.length === 1
+            items.length === 1 && !page.pageInfo.hasNextPage
               ? { componentsV2: mediaDetailComponents(await this.api.mediaDetail(items[0]!.id), settings) }
-              : this.mediaList(items, settings, t(locale, command))
+              : items.length || page.pageInfo.hasNextPage
+                ? this.searchResults(items, query, command, ctx, settings, 0, page.pageInfo.hasNextPage)
+                : { content: t(locale, 'emptySearch') }
           break
         }
         case 'media': {
