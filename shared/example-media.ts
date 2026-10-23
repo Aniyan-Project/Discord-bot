@@ -1,0 +1,141 @@
+import type { MediaCard } from './domain.js'
+// Public Branilist catalog snapshots for the labelled local demo, retrieved through the published SDK.
+// Covers remain on their original hosts; no artwork is copied into this repository.
+export const demoMedia: MediaCard[] = [
+  {
+    id: '79',
+    slug: 'sousou-no-frieren',
+    type: 'ANIME',
+    title: {
+      romaji: 'Sousou no Frieren',
+      english: "Frieren: Beyond Journey's End",
+      portuguese: 'Frieren e a Jornada para o Além',
+      native: '葬送のフリーレン',
+    },
+    description:
+      'Após uma missão de 10 anos ao lado do herói Himmel e seu grupo, a poderosa maga Frieren derrotou o Rei Demônio e trouxe paz ao reino. Como uma elfa, Frieren tem uma vida de mais de mil anos pela frente. Ela promete retornar para seus amigos e, assim, parte em uma jornada solitária. 50 anos se passam quando Frieren finalmente volta para visitar Himmel e os outros. Embora ela não tenha envelhecido nada, seus amigos têm pouco tempo de vida restante. É então que Frieren testemunha a morte de Himmel, o que a leva a lamentar não ter passado mais tempo junto dele. Com esse arrependimento em seu coração, ela embarca em uma nova jornada com o objetivo de se conectar e conhecer melhor as pessoas. Ao longo dessa viagem, a elfa Frieren encontrará diversas pessoas e viverá incontáveis aventuras emocionantes!',
+    coverImage: 'https://cdn.myanimelist.net/images/anime/1015/138006l.webp',
+    bannerImage: null,
+    episodes: 28,
+    chapters: null,
+    averageScore: null,
+    seasonYear: 2023,
+    status: 'FINISHED',
+    format: 'TV',
+    isAdult: false,
+  },
+  {
+    id: '3422',
+    slug: 'violet-evergarden',
+    type: 'ANIME',
+    title: {
+      romaji: 'Violet Evergarden',
+      english: 'Violet Evergarden',
+      portuguese: null,
+      native: 'ヴァイオレット・エヴァーガーデン',
+    },
+    description: null,
+    coverImage:
+      'https://media.branilist.com/media-cover/2026/10/be6a941a8ea073c405964aec6e8e0abd/original.png',
+    bannerImage:
+      'https://media.branilist.com/media-banner/2026/10/8f1482ca3c7032f04bd590c61fc2a66a/original.jpg',
+    episodes: 13,
+    chapters: null,
+    averageScore: null,
+    seasonYear: 2018,
+    status: 'FINISHED',
+    format: 'TV',
+    isAdult: false,
+  },
+  {
+    id: '4352',
+    slug: 'dandadan',
+    type: 'ANIME',
+    title: {
+      romaji: 'Dandadan',
+      english: 'DAN DA DAN',
+      portuguese: null,
+      native: 'ダンダダン',
+    },
+    description: null,
+    coverImage:
+      'https://media.branilist.com/media-cover/2026/10/e7586f2dd3856fb1d9bd0e6faec5b801/original.jpg',
+    bannerImage:
+      'https://media.branilist.com/media-banner/2026/10/bf30bca7331a58f6e00523ce784c4abc/original.jpg',
+    episodes: 12,
+    chapters: null,
+    averageScore: null,
+    seasonYear: 2024,
+    status: 'FINISHED',
+    format: 'TV',
+    isAdult: false,
+  },
+  {
+    id: '4666',
+    slug: 'bocchi-the-rock',
+    type: 'ANIME',
+    title: {
+      romaji: 'Bocchi the Rock!',
+      english: 'BOCCHI THE ROCK!',
+      portuguese: null,
+      native: 'ぼっち・ざ・ろっく！',
+    },
+    description: null,
+    coverImage:
+      'https://media.branilist.com/media-cover/2026/10/520273bfe636b9a598b91600bdd30330/original.png',
+    bannerImage:
+      'https://media.branilist.com/media-banner/2026/10/41aa60b6e7a6779c5a8dce85069333fc/original.jpg',
+    episodes: 12,
+    chapters: null,
+    averageScore: 100,
+    seasonYear: 2022,
+    status: 'FINISHED',
+    format: 'TV',
+    isAdult: false,
+  },
+  {
+    id: '2300',
+    slug: 'boku-no-one-piece',
+    type: 'MANGA',
+    title: {
+      romaji: 'Boku no One Piece',
+      english: null,
+      portuguese: null,
+      native: 'ぼくのワンピース',
+    },
+    description: null,
+    coverImage:
+      'https://media.branilist.com/media-cover/2026/09/cd29c85873344731b218aa60aa2d20e8/original.jpg',
+    bannerImage: null,
+    episodes: null,
+    chapters: null,
+    averageScore: null,
+    seasonYear: null,
+    status: 'FINISHED',
+    format: 'MANGA',
+    isAdult: false,
+  },
+  {
+    id: '3169',
+    slug: 'vinland-saga',
+    type: 'MANGA',
+    title: {
+      romaji: 'Vinland Saga',
+      english: 'Vinland Saga',
+      portuguese: null,
+      native: 'ヴィンランド・サガ',
+    },
+    description: null,
+    coverImage:
+      'https://media.branilist.com/media-cover/2026/10/ad9b312ef72f4d9bc33448282c7c9501/original.jpg',
+    bannerImage:
+      'https://media.branilist.com/media-banner/2026/10/f6af5454d5b0528df312884b1777e7a4/original.jpg',
+    episodes: null,
+    chapters: 224,
+    averageScore: null,
+    seasonYear: null,
+    status: 'FINISHED',
+    format: 'MANGA',
+    isAdult: false,
+  },
+]

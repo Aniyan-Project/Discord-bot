@@ -1,0 +1,36 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 4100
+      DATABASE_PATH: /app/data/branilist-bot.sqlite
+      TRUST_PROXY: loopback,linklocal,uniquelocal
+    ports:
+      - '127.0.0.1:4100:4100'
+    volumes:
+      - bot-data:/app/data
+    stop_grace_period: 30s
+  proxy:
+    image: caddy:2-alpine
+    profiles: [proxy]
+    restart: unless-stopped
+    environment:
+      BOT_DOMAIN: ${BOT_DOMAIN:-bot.example.com}
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+volumes:
+  bot-data:
+  caddy-data:
+  caddy-config:

@@ -1,0 +1,510 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-23T07:57:26.804Z",
+  "title": "Design System: Branilist Bot",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Primary",
+        "canonical": "#ff9955",
+        "tonalRamp": [
+          "oklch(15% 0.1477 52.47)",
+          "oklch(26% 0.1477 52.47)",
+          "oklch(38% 0.1477 52.47)",
+          "oklch(49% 0.1477 52.47)",
+          "oklch(61% 0.1477 52.47)",
+          "oklch(72% 0.1477 52.47)",
+          "oklch(84% 0.1477 52.47)",
+          "oklch(95% 0.1477 52.47)"
+        ]
+      },
+      "accent-ink": {
+        "role": "primary",
+        "displayName": "Accent Ink",
+        "canonical": "#2e1a0c",
+        "tonalRamp": [
+          "oklch(15% 0.0398 54.60)",
+          "oklch(26% 0.0398 54.60)",
+          "oklch(38% 0.0398 54.60)",
+          "oklch(49% 0.0398 54.60)",
+          "oklch(61% 0.0398 54.60)",
+          "oklch(72% 0.0398 54.60)",
+          "oklch(84% 0.0398 54.60)",
+          "oklch(95% 0.0398 54.60)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Primary Hover",
+        "canonical": "#ffb37e",
+        "tonalRamp": [
+          "oklch(15% 0.1122 55.39)",
+          "oklch(26% 0.1122 55.39)",
+          "oklch(38% 0.1122 55.39)",
+          "oklch(49% 0.1122 55.39)",
+          "oklch(61% 0.1122 55.39)",
+          "oklch(72% 0.1122 55.39)",
+          "oklch(84% 0.1122 55.39)",
+          "oklch(95% 0.1122 55.39)"
+        ]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Neutral Bg",
+        "canonical": "#121311",
+        "tonalRamp": [
+          "oklch(15% 0.0043 128.72)",
+          "oklch(26% 0.0043 128.72)",
+          "oklch(38% 0.0043 128.72)",
+          "oklch(49% 0.0043 128.72)",
+          "oklch(61% 0.0043 128.72)",
+          "oklch(72% 0.0043 128.72)",
+          "oklch(84% 0.0043 128.72)",
+          "oklch(95% 0.0043 128.72)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#1a1b18",
+        "tonalRamp": [
+          "oklch(15% 0.0059 121.93)",
+          "oklch(26% 0.0059 121.93)",
+          "oklch(38% 0.0059 121.93)",
+          "oklch(49% 0.0059 121.93)",
+          "oklch(61% 0.0059 121.93)",
+          "oklch(72% 0.0059 121.93)",
+          "oklch(84% 0.0059 121.93)",
+          "oklch(95% 0.0059 121.93)"
+        ]
+      },
+      "surface-raised": {
+        "role": "neutral",
+        "displayName": "Surface Raised",
+        "canonical": "#22231f",
+        "tonalRamp": [
+          "oklch(15% 0.0075 118.35)",
+          "oklch(26% 0.0075 118.35)",
+          "oklch(38% 0.0075 118.35)",
+          "oklch(49% 0.0075 118.35)",
+          "oklch(61% 0.0075 118.35)",
+          "oklch(72% 0.0075 118.35)",
+          "oklch(84% 0.0075 118.35)",
+          "oklch(95% 0.0075 118.35)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "canonical": "#32342d",
+        "tonalRamp": [
+          "oklch(15% 0.0124 120.08)",
+          "oklch(26% 0.0124 120.08)",
+          "oklch(38% 0.0124 120.08)",
+          "oklch(49% 0.0124 120.08)",
+          "oklch(61% 0.0124 120.08)",
+          "oklch(72% 0.0124 120.08)",
+          "oklch(84% 0.0124 120.08)",
+          "oklch(95% 0.0124 120.08)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Text",
+        "canonical": "#edeee9",
+        "tonalRamp": [
+          "oklch(15% 0.0067 115.71)",
+          "oklch(26% 0.0067 115.71)",
+          "oklch(38% 0.0067 115.71)",
+          "oklch(49% 0.0067 115.71)",
+          "oklch(61% 0.0067 115.71)",
+          "oklch(72% 0.0067 115.71)",
+          "oklch(84% 0.0067 115.71)",
+          "oklch(95% 0.0067 115.71)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#a9ada0",
+        "tonalRamp": [
+          "oklch(15% 0.0188 120.80)",
+          "oklch(26% 0.0188 120.80)",
+          "oklch(38% 0.0188 120.80)",
+          "oklch(49% 0.0188 120.80)",
+          "oklch(61% 0.0188 120.80)",
+          "oklch(72% 0.0188 120.80)",
+          "oklch(84% 0.0188 120.80)",
+          "oklch(95% 0.0188 120.80)"
+        ]
+      },
+      "danger": {
+        "role": "neutral",
+        "displayName": "Danger",
+        "canonical": "#ff9c99",
+        "tonalRamp": [
+          "oklch(15% 0.1190 21.95)",
+          "oklch(26% 0.1190 21.95)",
+          "oklch(38% 0.1190 21.95)",
+          "oklch(49% 0.1190 21.95)",
+          "oklch(61% 0.1190 21.95)",
+          "oklch(72% 0.1190 21.95)",
+          "oklch(84% 0.1190 21.95)",
+          "oklch(95% 0.1190 21.95)"
+        ]
+      },
+      "success": {
+        "role": "neutral",
+        "displayName": "Success",
+        "canonical": "#a8d8a5",
+        "tonalRamp": [
+          "oklch(15% 0.0861 143.28)",
+          "oklch(26% 0.0861 143.28)",
+          "oklch(38% 0.0861 143.28)",
+          "oklch(49% 0.0861 143.28)",
+          "oklch(61% 0.0861 143.28)",
+          "oklch(72% 0.0861 143.28)",
+          "oklch(84% 0.0861 143.28)",
+          "oklch(95% 0.0861 143.28)"
+        ]
+      },
+      "field-bg": {
+        "role": "neutral",
+        "displayName": "Field Bg",
+        "canonical": "#12140f",
+        "tonalRamp": [
+          "oklch(15% 0.0104 125.16)",
+          "oklch(26% 0.0104 125.16)",
+          "oklch(38% 0.0104 125.16)",
+          "oklch(49% 0.0104 125.16)",
+          "oklch(61% 0.0104 125.16)",
+          "oklch(72% 0.0104 125.16)",
+          "oklch(84% 0.0104 125.16)",
+          "oklch(95% 0.0104 125.16)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field Border",
+        "canonical": "#3c4133",
+        "tonalRamp": [
+          "oklch(15% 0.0242 123.57)",
+          "oklch(26% 0.0242 123.57)",
+          "oklch(38% 0.0242 123.57)",
+          "oklch(49% 0.0242 123.57)",
+          "oklch(61% 0.0242 123.57)",
+          "oklch(72% 0.0242 123.57)",
+          "oklch(84% 0.0242 123.57)",
+          "oklch(95% 0.0242 123.57)"
+        ]
+      },
+      "field-text": {
+        "role": "neutral",
+        "displayName": "Field Text",
+        "canonical": "#e5e9dd",
+        "tonalRamp": [
+          "oklch(15% 0.0165 121.78)",
+          "oklch(26% 0.0165 121.78)",
+          "oklch(38% 0.0165 121.78)",
+          "oklch(49% 0.0165 121.78)",
+          "oklch(61% 0.0165 121.78)",
+          "oklch(72% 0.0165 121.78)",
+          "oklch(84% 0.0165 121.78)",
+          "oklch(95% 0.0165 121.78)"
+        ]
+      },
+      "secondary-bg": {
+        "role": "neutral",
+        "displayName": "Secondary Bg",
+        "canonical": "#282a23",
+        "tonalRamp": [
+          "oklch(15% 0.0128 120.20)",
+          "oklch(26% 0.0128 120.20)",
+          "oklch(38% 0.0128 120.20)",
+          "oklch(49% 0.0128 120.20)",
+          "oklch(61% 0.0128 120.20)",
+          "oklch(72% 0.0128 120.20)",
+          "oklch(84% 0.0128 120.20)",
+          "oklch(95% 0.0128 120.20)"
+        ]
+      },
+      "secondary-border": {
+        "role": "neutral",
+        "displayName": "Secondary Border",
+        "canonical": "#424539",
+        "tonalRamp": [
+          "oklch(15% 0.0201 118.76)",
+          "oklch(26% 0.0201 118.76)",
+          "oklch(38% 0.0201 118.76)",
+          "oklch(49% 0.0201 118.76)",
+          "oklch(61% 0.0201 118.76)",
+          "oklch(72% 0.0201 118.76)",
+          "oklch(84% 0.0201 118.76)",
+          "oklch(95% 0.0201 118.76)"
+        ]
+      },
+      "secondary-hover": {
+        "role": "neutral",
+        "displayName": "Secondary Hover",
+        "canonical": "#34372d",
+        "tonalRamp": [
+          "oklch(15% 0.0176 120.94)",
+          "oklch(26% 0.0176 120.94)",
+          "oklch(38% 0.0176 120.94)",
+          "oklch(49% 0.0176 120.94)",
+          "oklch(61% 0.0176 120.94)",
+          "oklch(72% 0.0176 120.94)",
+          "oklch(84% 0.0176 120.94)",
+          "oklch(95% 0.0176 120.94)"
+        ]
+      },
+      "settings-bg": {
+        "role": "neutral",
+        "displayName": "Settings Bg",
+        "canonical": "#191b17",
+        "tonalRamp": [
+          "oklch(15% 0.0082 128.89)",
+          "oklch(26% 0.0082 128.89)",
+          "oklch(38% 0.0082 128.89)",
+          "oklch(49% 0.0082 128.89)",
+          "oklch(61% 0.0082 128.89)",
+          "oklch(72% 0.0082 128.89)",
+          "oklch(84% 0.0082 128.89)",
+          "oklch(95% 0.0082 128.89)"
+        ]
+      },
+      "settings-border": {
+        "role": "neutral",
+        "displayName": "Settings Border",
+        "canonical": "#33362d",
+        "tonalRamp": [
+          "oklch(15% 0.0160 122.29)",
+          "oklch(26% 0.0160 122.29)",
+          "oklch(38% 0.0160 122.29)",
+          "oklch(49% 0.0160 122.29)",
+          "oklch(61% 0.0160 122.29)",
+          "oklch(72% 0.0160 122.29)",
+          "oklch(84% 0.0160 122.29)",
+          "oklch(95% 0.0160 122.29)"
+        ]
+      },
+      "nav-active-bg": {
+        "role": "neutral",
+        "displayName": "Nav Active Bg",
+        "canonical": "#352a20",
+        "tonalRamp": [
+          "oklch(15% 0.0238 63.97)",
+          "oklch(26% 0.0238 63.97)",
+          "oklch(38% 0.0238 63.97)",
+          "oklch(49% 0.0238 63.97)",
+          "oklch(61% 0.0238 63.97)",
+          "oklch(72% 0.0238 63.97)",
+          "oklch(84% 0.0238 63.97)",
+          "oklch(95% 0.0238 63.97)"
+        ]
+      },
+      "nav-active-text": {
+        "role": "neutral",
+        "displayName": "Nav Active Text",
+        "canonical": "#ffc08f",
+        "tonalRamp": [
+          "oklch(15% 0.0966 58.88)",
+          "oklch(26% 0.0966 58.88)",
+          "oklch(38% 0.0966 58.88)",
+          "oklch(49% 0.0966 58.88)",
+          "oklch(61% 0.0966 58.88)",
+          "oklch(72% 0.0966 58.88)",
+          "oklch(84% 0.0966 58.88)",
+          "oklch(95% 0.0966 58.88)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Public hero",
+        "purpose": "Public headline with tight balanced wrapping."
+      },
+      "headline": {
+        "displayName": "Page title",
+        "purpose": "Dashboard screen title."
+      },
+      "title": {
+        "displayName": "Section title",
+        "purpose": "Major content groups."
+      },
+      "body": {
+        "displayName": "Description",
+        "purpose": "Dashboard explanatory copy."
+      },
+      "label": {
+        "displayName": "Control label",
+        "purpose": "Native form labels."
+      },
+      "command": {
+        "displayName": "Command syntax",
+        "purpose": "Prefixes and command examples."
+      }
+    },
+    "shadows": [
+      {
+        "name": "scene",
+        "value": "0 26px 62px #0004",
+        "purpose": "Public demonstration only."
+      },
+      {
+        "name": "dialog",
+        "value": "0 28px 70px #0007",
+        "purpose": "Modal elevation."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state",
+        "value": "0.15s",
+        "purpose": "Button colors, cover brightness and switch transform; CSS default ease."
+      },
+      {
+        "name": "save-in",
+        "value": "0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Save bar enters from translateY(9px)."
+      },
+      {
+        "name": "loading",
+        "value": "0.8s linear infinite",
+        "purpose": "Loading spinner."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "Animation and transition durations; one animation iteration, scroll-behavior auto."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-min",
+        "value": "1600px"
+      },
+      {
+        "name": "compact-max",
+        "value": "1200px"
+      },
+      {
+        "name": "drawer-max",
+        "value": "1000px"
+      },
+      {
+        "name": "stack-max",
+        "value": "760px"
+      },
+      {
+        "name": "narrow-max",
+        "value": "420px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main save or entry action.",
+      "html": "<button class=\"ds-btn\">Salvar alterações</button>",
+      "css": ".ds-btn{font-family:'Manrope Variable',Manrope,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;border-radius:9px;padding:12px 18px;font-size:.84rem;font-weight:750;line-height:1.3;border:0;cursor:pointer;transition:background-color .15s,color .15s;background:var(--accent,#ff9955);color:var(--accent-ink,#2e1a0c)}.ds-btn:hover{background:#ffb37e}.ds-btn:focus-visible{outline:2px solid var(--accent,#ff9955);outline-offset:4px}.ds-btn:disabled{opacity:.5;cursor:not-allowed}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Supporting action with a visible seam.",
+      "html": "<button class=\"ds-btn\">Ver comandos</button>",
+      "css": ".ds-btn{font-family:'Manrope Variable',Manrope,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;border-radius:9px;padding:12px 18px;font-size:.84rem;font-weight:750;line-height:1.3;border:0;cursor:pointer;transition:background-color .15s,color .15s;background:#282a23;border:1px solid #424539;color:var(--text,#edeee9)}.ds-btn:hover{background:#34372d}.ds-btn:focus-visible{outline:2px solid var(--accent,#ff9955);outline-offset:4px}"
+    },
+    {
+      "name": "Quiet button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Low emphasis discard action.",
+      "html": "<button class=\"ds-btn\">Descartar</button>",
+      "css": ".ds-btn{font-family:'Manrope Variable',Manrope,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;border-radius:9px;padding:12px 18px;font-size:.84rem;font-weight:750;line-height:1.3;border:0;cursor:pointer;transition:background-color .15s,color .15s;background:transparent;color:var(--muted,#a9ada0)}.ds-btn:hover{background:#282a23;color:var(--text,#edeee9)}.ds-btn:focus-visible{outline:2px solid var(--accent,#ff9955);outline-offset:4px}"
+    },
+    {
+      "name": "Text field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "Visible label and compact native input.",
+      "html": "<label class=\"ds-field\"><span>Apelido</span><input placeholder=\"Branilist Bot\" value=\"Branilist Bot\"></label>",
+      "css": ".ds-field{font-family:'Manrope Variable',Manrope,sans-serif;display:flex;flex-direction:column;gap:9px;font-size:.76rem;font-weight:650;color:#d9ddd0}.ds-field input{font:inherit;background:#12140f;color:#e5e9dd;min-height:42px;border:1px solid #3c4133;border-radius:7px;padding:10px 12px;min-width:0}.ds-field input::placeholder{color:#929c87}.ds-field input:focus-visible{outline:2px solid var(--accent,#ff9955);outline-offset:4px}"
+    },
+    {
+      "name": "Sidebar navigation",
+      "kind": "nav",
+      "refersTo": "nav-active",
+      "description": "Calm current-route emphasis with semantic links.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Painel\"><a href=\"#overview\">Visão geral</a><a href=\"#settings\" aria-current=\"page\">Configuração</a></nav>",
+      "css": ".ds-nav{font-family:'Manrope Variable',Manrope,sans-serif;display:flex;flex-direction:column;gap:5px;background:#181916;padding:13px}.ds-nav a{display:flex;align-items:center;min-height:44px;padding:12px;border-radius:8px;font-size:.78rem;font-weight:600;text-decoration:none;color:#b0b5a7}.ds-nav a:hover{background:#24261f;color:#e5e9dd}.ds-nav a[aria-current]{background:#352a20;color:#ffc08f}.ds-nav a:focus-visible{outline:2px solid var(--accent,#ff9955);outline-offset:4px}"
+    },
+    {
+      "name": "Channel choice",
+      "kind": "chip",
+      "description": "Native checkbox inside a wrapping channel cell.",
+      "html": "<label class=\"ds-channel\"><input type=\"checkbox\" checked><span><span aria-hidden=\"true\">#</span> anime-e-manga</span></label>",
+      "css": ".ds-channel{font-family:'Manrope Variable',Manrope,sans-serif;display:inline-flex;align-items:center;gap:9px;padding:11px 12px;border:1px solid #3c4133;background:#15180f;border-radius:8px;font-size:.75rem;color:#c7d0ba;cursor:pointer}.ds-channel span{overflow-wrap:anywhere}.ds-channel input{width:15px;height:15px;margin:0;accent-color:var(--accent,#ff9955)}.ds-channel input:focus-visible{outline:2px solid var(--accent,#ff9955);outline-offset:4px}"
+    },
+    {
+      "name": "Settings panel",
+      "kind": "card",
+      "refersTo": "settings-panel",
+      "description": "A named field group, separated by a seam rather than shadow.",
+      "html": "<fieldset class=\"ds-panel\"><legend>Identidade</legend><p>Personalize o bot neste servidor.</p></fieldset>",
+      "css": ".ds-panel{font-family:'Manrope Variable',Manrope,sans-serif;border:1px solid #33362d;border-radius:14px;background:#191b17;margin:0;padding:24px;color:var(--text,#edeee9);min-width:0}.ds-panel legend{font-size:.9rem;font-weight:750;padding:0 6px;letter-spacing:-.02em}.ds-panel p{font-size:.76rem;color:var(--muted,#a9ada0);line-height:1.7}"
+    },
+    {
+      "name": "Switch",
+      "kind": "custom",
+      "description": "Native labelled switch with a visible focus track.",
+      "html": "<label class=\"ds-toggle\"><span>Mostrar capas</span><input type=\"checkbox\" role=\"switch\" checked><span class=\"ds-track\" aria-hidden=\"true\"></span></label>",
+      "css": ".ds-toggle{font-family:'Manrope Variable',Manrope,sans-serif;position:relative;display:flex;align-items:center;justify-content:space-between;gap:20px;cursor:pointer;padding:16px 0;border-top:1px solid #30342a;color:var(--text,#edeee9);font-size:.78rem;font-weight:650}.ds-toggle input{position:absolute;width:44px;height:26px;right:0;opacity:0;margin:0;cursor:pointer}.ds-track{width:38px;height:22px;background:#444c39;border-radius:20px;flex-shrink:0;pointer-events:none;position:relative}.ds-track:before{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#d8ddce;transition:transform .15s}.ds-toggle input:checked+.ds-track{background:var(--accent,#ff9955)}.ds-toggle input:checked+.ds-track:before{background:#332213;transform:translateX(16px)}.ds-toggle input:focus-visible+.ds-track{outline:2px solid var(--accent,#ff9955);outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-track:before{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Discord embed",
+      "kind": "custom",
+      "description": "Literal response grammar; the stripe is restricted to the Discord embed.",
+      "html": "<div class=\"ds-embed\"><div><a href=\"#media\">Sousou no Frieren</a><p>Uma nova jornada para conhecer as pessoas.</p><span>Episódios <strong>28</strong></span></div></div>",
+      "css": ".ds-embed{font-family:'Manrope Variable',Manrope,sans-serif;position:relative;display:flex;gap:12px;background:#1a1e16;border-radius:4px;padding:15px 12px 14px 15px;color:#b9c5ad}.ds-embed:before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--embed-accent,#ff9955);border-radius:4px 0 0 4px}.ds-embed a{font-size:.77rem;line-height:1.5;font-weight:750;color:#a9c5f0;text-decoration:none}.ds-embed a:hover{text-decoration:underline}.ds-embed a:focus-visible{outline:2px solid var(--accent,#ff9955);outline-offset:4px}.ds-embed p{font-size:.65rem;line-height:1.75;margin:9px 0 14px}.ds-embed span{font-size:.57rem;font-weight:600}.ds-embed strong{display:block;margin-top:4px;font-size:.68rem;font-weight:550;color:#e3ecd7}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Anime club at night",
+    "overview": "An anime club at night: warm graphite panels, quiet neutral lettering and restrained orange actions frame real anime cover art. The workspace feels calm and useful; server administration and personal account authorization have separate destinations.\n\nThe shipped interface uses thin seams and tonal layers rather than decorative dashboard effects. Cover art supplies visual richness, while labels, state messages and a working Discord response preview explain what controls do.",
+    "keyCharacteristics": [
+      "Warm graphite layers with restrained orange actions.",
+      "Self-hosted Manrope and compact, explicit labels.",
+      "Original-host catalog covers with resilient initial fallbacks.",
+      "Live draft preview and an explicit pending-save state."
+    ],
+    "rules": [
+      {
+        "name": "The Action Orange Rule",
+        "body": "Use orange for primary actions, focus, selected switches and command links; keep large workspace surfaces graphite.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Panel Rule",
+        "body": "Separate working areas with tonal changes and thin seams; reserve diffuse shadows for the public demonstration and dialogs.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the pending save bar and preview synchronized with the draft.",
+      "Do preserve visible labels, focus outlines, native dialog behavior and reduced-motion support.",
+      "Do retain original catalog cover hosts and the image fallback.",
+      "Do use actual data or clearly labelled demo examples."
+    ],
+    "donts": [
+      "Don't import the inspiration site's mascot, branding or unrelated moderation features.",
+      "Don't turn the Discord embed's 3px accent stripe into general card decoration.",
+      "Don't replace the calm graphite world with neon, decorative gradients or invented adoption statistics."
+    ]
+  }
+}
