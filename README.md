@@ -109,6 +109,8 @@ O prefixo padrão é `b!`. No dashboard ou em `/settings`, cada servidor pode es
 
 Status aceitos: `PLANNING`, `CURRENT`, `COMPLETED`, `PAUSED`, `DROPPED`. O comando de progresso permite atualizar o status opcionalmente. Apelido, canais, aparência e ativação de comandos são ajustados no dashboard.
 
+Ao escolher uma sugestão do autocomplete de `/anime` ou `/manga`, o bot consulta o ID selecionado e abre diretamente a ficha da obra. A ficha usa Components V2, com capa, status, nota, gêneros, sinopse e relações disponíveis após uma divisória. Prequelas e sequências têm prioridade; até seis relações aparecem na mensagem, com acesso às demais pelo catálogo. As preferências de idioma, cor, capas e sinopses do servidor continuam valendo. Pesquisas livres com vários resultados mantêm a lista de resultados.
+
 Respostas de biblioteca, favoritos, coleções, configurações e alterações pessoais são privadas: efêmeras no slash e por DM no prefixo. Se a DM estiver bloqueada, o bot orienta usar slash. Botões de confirmação pertencem à pessoa que iniciou a ação e expiram em cinco minutos.
 
 Pesquisas, autocomplete e prévias filtram conteúdo adulto. Este projeto não oferece comandos de moderação, música, leitura de DMs de terceiros ou funções administrativas do Branilist.

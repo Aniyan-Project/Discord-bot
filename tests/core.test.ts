@@ -188,7 +188,7 @@ test('commands perform real demo CRUD, enforce access settings and protect confi
   const run = (name: Parameters<typeof engine.execute>[0], args: string[] = []) =>
     engine.execute(name, args, { ...invocation, userId: `${name}-user` })
   try {
-    assert.ok((await run('anime', ['Frieren'])).embeds?.length)
+    assert.ok((await run('anime', ['Frieren'])).componentsV2?.length)
     assert.equal((await run('library')).private, true)
     await run('progress', [demoMedia[0]!.id, '7'])
     assert.equal((await api.library('one')).nodes.find((e) => e.mediaId === demoMedia[0]!.id)?.progress, 7)

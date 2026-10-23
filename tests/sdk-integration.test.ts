@@ -4,7 +4,49 @@ import { loadConfig } from '../server/config.js'
 import { Store, type AccountTokens } from '../server/store.js'
 import { BranilistService } from '../server/branilist.js'
 import { AppError } from '../server/security.js'
+import { demoMedia } from '../shared/example-media.js'
 const key = '33'.repeat(32)
+
+test('detail queries fetch genres and filter unavailable or adult related works', async () => {
+  const original = globalThis.fetch
+  let query = ''
+  globalThis.fetch = async (_url, init) => {
+    query = JSON.parse(init!.body as string).query
+    return new Response(
+      JSON.stringify({
+        data: {
+          media: {
+            ...demoMedia[0],
+            genres: { nodes: [{ name: 'Fantasia' }] },
+            relations: {
+              nodes: [
+                { type: 'PREQUEL', media: { ...demoMedia[0], id: '1' } },
+                { type: 'SEQUEL', media: { ...demoMedia[0], id: '2', isAdult: true } },
+                { type: 'OTHER', media: null },
+              ],
+              pageInfo: { hasNextPage: false },
+            },
+          },
+        },
+      }),
+    )
+  }
+  const store = new Store(':memory:', key)
+  try {
+    const result = await new BranilistService(cfg(), store).mediaDetail('79')
+    assert.deepEqual(result.genres, ['Fantasia'])
+    assert.deepEqual(
+      result.relations?.map((r) => r.media.id),
+      ['1'],
+    )
+    assert.match(query, /genres/)
+    assert.match(query, /relations/)
+    assert.match(query, /isAdult/)
+  } finally {
+    globalThis.fetch = original
+    store.close()
+  }
+})
 function tokens(scopes = ['profile:read']): AccountTokens {
   return {
     access_token: 'expired',

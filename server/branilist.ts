@@ -146,6 +146,42 @@ export class BranilistService {
     )
     return result.trendingMedia.filter((m) => !m.isAdult)
   }
+  async mediaDetail(id: string): Promise<MediaCard> {
+    if (this.config.DEMO_MODE) return this.media(id)
+    const result = await this.withErrors(() =>
+      this.catalog.query({
+        media: {
+          __args: { id },
+          ...mediaFields,
+          genres: { __args: { first: 25 }, nodes: { name: true } },
+          relations: {
+            __args: { first: 30 },
+            nodes: {
+              type: true,
+              media: {
+                id: true,
+                slug: true,
+                type: true,
+                isAdult: true,
+                title: { romaji: true, english: true, portuguese: true, native: true },
+              },
+            },
+            pageInfo: { hasNextPage: true },
+          },
+        },
+      }),
+    )
+    const media = result.media
+    if (!media || media.isAdult) throw new AppError(404, 'notFound')
+    return {
+      ...media,
+      genres: media.genres.nodes.map((g) => g.name),
+      relations: media.relations.nodes.flatMap((r) =>
+        r.media && !r.media.isAdult ? [{ type: r.type, media: r.media }] : [],
+      ),
+      hasMoreRelations: media.relations.pageInfo.hasNextPage,
+    }
+  }
   private async freshTokens(discordId: string): Promise<AccountTokens> {
     const tokens = this.store.account(discordId)
     if (!tokens) throw new AppError(401, 'linkRequired')

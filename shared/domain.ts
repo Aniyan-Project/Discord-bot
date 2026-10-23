@@ -77,6 +77,11 @@ export interface MediaCard {
   format: string
   isAdult: boolean
   genres?: string[]
+  relations?: Array<{
+    type: string
+    media: Pick<MediaCard, 'id' | 'slug' | 'type' | 'title'>
+  }>
+  hasMoreRelations?: boolean
 }
 export interface ProfileCard {
   id: string
@@ -113,11 +118,18 @@ export interface SessionView {
   inviteUrl: string | null
   supportUrl: string
 }
-export function mediaTitle(media: MediaCard, language: GuildSettings['titleLanguage']): string {
+export function mediaTitle(
+  media: Pick<MediaCard, 'title'>,
+  language: GuildSettings['titleLanguage'],
+): string {
   return media.title[language] || media.title.romaji
 }
 export function mediaURL(media: Pick<MediaCard, 'slug' | 'type'>): string {
-  return `https://branilist.com/${media.type === 'MANGA' ? 'manga' : 'anime'}/${encodeURIComponent(media.slug)}`
+  const slug = encodeURIComponent(media.slug).replace(
+    /[!'()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  )
+  return `https://branilist.com/${media.type === 'MANGA' ? 'manga' : 'anime'}/${slug}`
 }
 export function safeImage(url: string | null | undefined): string | undefined {
   if (!url) return undefined

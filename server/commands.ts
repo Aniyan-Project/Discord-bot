@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { escapeMarkdown, type APIEmbed } from 'discord.js'
+import { escapeMarkdown, type APIEmbed, type APIContainerComponent } from 'discord.js'
+import { mediaDetailComponents, selectedMediaId } from './media-message.js'
 import {
   commandIds,
   defaultSettings,
@@ -28,6 +29,7 @@ export interface Invocation {
   source: 'slash' | 'prefix'
 }
 export interface CommandResult {
+  componentsV2?: APIContainerComponent[]
   embeds?: APIEmbed[]
   content?: string
   private?: boolean
@@ -201,10 +203,17 @@ export class CommandEngine {
         case 'anime':
         case 'manga': {
           const query = z.string().trim().min(1).max(150).parse(args.join(' '))
+          const selectedId = ctx.source === 'slash' ? selectedMediaId(query) : undefined
+          if (selectedId) {
+            const media = await this.api.mediaDetail(selectedId)
+            if (media.type !== (command === 'anime' ? 'ANIME' : 'MANGA')) throw new AppError(404, 'notFound')
+            result = { componentsV2: mediaDetailComponents(media, settings) }
+            break
+          }
           const items = (await this.api.search(query, command === 'anime' ? 'ANIME' : 'MANGA')).nodes
           result =
             items.length === 1
-              ? { embeds: [this.mediaEmbed(items[0]!, settings)] }
+              ? { componentsV2: mediaDetailComponents(await this.api.mediaDetail(items[0]!.id), settings) }
               : this.mediaList(items, settings, t(locale, command))
           break
         }

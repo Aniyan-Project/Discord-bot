@@ -20,6 +20,7 @@ import { parsePrefix } from './parser.js'
 import { AppError } from './security.js'
 import { commandIds, normalizeLocale, mediaTitle, type CommandId, type Locale } from '../shared/domain.js'
 import { hasMessage, t } from '../shared/i18n.js'
+import { mediaChoiceValue } from './media-message.js'
 const privateCommands = new Set<CommandId>([
   'library',
   'progress',
@@ -58,7 +59,13 @@ function components(result: CommandResult) {
     )
   return rows
 }
-function payload(result: CommandResult) {
+export function payload(result: CommandResult) {
+  if (result.componentsV2)
+    return {
+      flags: MessageFlags.IsComponentsV2 as const,
+      components: result.componentsV2,
+      allowedMentions: { parse: [] as [], repliedUser: false },
+    }
   return {
     content: result.content ?? '',
     embeds: result.embeds ?? ([] as APIEmbed[]),
@@ -249,7 +256,7 @@ export class BotRuntime {
         await interaction.respond(
           result?.nodes.slice(0, 10).map((m) => ({
             name: mediaTitle(m, settings?.titleLanguage ?? 'romaji').slice(0, 100),
-            value: m.title.romaji.slice(0, 100),
+            value: mediaChoiceValue(m.id),
           })) ?? [],
         )
       } finally {
