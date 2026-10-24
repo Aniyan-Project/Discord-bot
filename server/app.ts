@@ -11,11 +11,11 @@ import type { Config } from './config.js'
 import { Store, type Session } from './store.js'
 import { BranilistService, accountScopes } from './branilist.js'
 import { DiscordAuth } from './discord-auth.js'
-import { BotRuntime } from './bot.js'
+import { BotRuntime } from './bot/runtime.js'
 import { AppError, constantEqual, hashToken, requireOrigin } from './security.js'
 import { guildSettingsSchema, type GuildSummary, type SessionView } from '../shared/domain.js'
 import { parseStudioDraft } from '../shared/message-studio.js'
-import { MessageStudio } from './message-studio.js'
+import { MessageStudio } from './bot/services/message-studio.js'
 const snowflake = z.string().regex(/^\d{17,20}$/)
 const mediaId = z.string().regex(/^[1-9]\d{0,19}$/)
 const status = z.enum(['PLANNING', 'CURRENT', 'COMPLETED', 'PAUSED', 'DROPPED'])

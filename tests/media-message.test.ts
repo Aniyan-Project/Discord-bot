@@ -1,9 +1,13 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { MessageFlags } from 'discord.js'
-import { mediaChoiceValue, selectedMediaId, mediaDetailComponents } from '../server/media-message.js'
-import { payload } from '../server/bot.js'
-import { CommandEngine } from '../server/commands.js'
+import {
+  mediaChoiceValue,
+  selectedMediaId,
+  mediaDetailComponents,
+} from '../server/bot/presentation/media/index.js'
+import { payload } from '../server/bot/presentation/payload.js'
+import { CommandEngine } from '../server/bot/core/engine.js'
 import { BranilistService } from '../server/branilist.js'
 import { Store } from '../server/store.js'
 import { loadConfig } from '../server/config.js'

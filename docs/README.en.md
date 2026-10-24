@@ -19,6 +19,8 @@ Open http://localhost:5173. The clearly labelled demo runs on loopback with an i
 
 ## Configure a real installation
 
+Discord-specific code lives in `server/bot/`: one command module per feature, typed command registry, separate gateway events, interaction handlers, session state and presentation. See the [extension guide](bot-development.md) (Portuguese) before adding commands or events.
+
 1. Copy `.env.example` to `.env`.
 2. Create a Discord application. Set `DISCORD_TOKEN`, `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET`. Register `APP_URL/auth/discord/callback` as its redirect URI.
 3. Enable Message Content Intent for prefix commands, or set `ENABLE_MESSAGE_CONTENT=false` to use slash commands only.

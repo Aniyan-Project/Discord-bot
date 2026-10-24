@@ -19,6 +19,8 @@ Abre http://localhost:5173. La demostración está identificada, usa loopback, u
 
 ## Configurar una instalación real
 
+El código de Discord está en `server/bot/`: módulos de comandos, registro tipado, eventos del gateway, handlers de interacciones, sesiones y presentación separados. Consulta la [guía de extensión](bot-development.md) (portugués) antes de añadir comandos o eventos.
+
 1. Copia `.env.example` a `.env`.
 2. Crea una aplicación Discord. Configura `DISCORD_TOKEN`, `DISCORD_CLIENT_ID` y `DISCORD_CLIENT_SECRET`. Registra `APP_URL/auth/discord/callback` como URI de retorno.
 3. Activa Message Content Intent para comandos con prefijo, o configura `ENABLE_MESSAGE_CONTENT=false` para usar solo slash.

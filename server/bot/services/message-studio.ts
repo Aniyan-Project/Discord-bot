@@ -9,7 +9,7 @@ import {
   type TextChannel,
   type NewsChannel,
 } from 'discord.js'
-import type { Locale, UserInfo } from '../shared/domain.js'
+import type { Locale, UserInfo } from '../../../shared/domain.js'
 import {
   parseStudioDraft,
   studioPayload,
@@ -17,8 +17,8 @@ import {
   validateStudioPayload,
   type StudioDraft,
   type StudioVariables,
-} from '../shared/message-studio.js'
-import { AppError } from './security.js'
+} from '../../../shared/message-studio.js'
+import { AppError } from '../../security.js'
 
 type Destination = TextChannel | NewsChannel
 export class MessageStudio {

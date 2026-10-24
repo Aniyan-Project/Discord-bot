@@ -156,14 +156,15 @@ Os testes usam mocks, injeção HTTP e a demonstração local. Não registram co
 Estrutura:
 
 ```text
-server/       Gateway Discord, OAuth, API do dashboard, integração SDK e SQLite
+server/bot/   Comandos, eventos, handlers, sessões e apresentação do Discord
+server/       API do dashboard, OAuth, integração SDK e SQLite compartilhados
 web/          Site, dashboard e estilos responsivos
 shared/       Contratos, validação, três idiomas e exemplos do catálogo
 tests/        Segurança, comandos, integração SDK, produção e navegador
 deploy/       Exemplo de proxy HTTPS
 ```
 
-Consulte [arquitetura e segurança](docs/architecture.md), [privacidade operacional](docs/privacy.md) e [contribuição](CONTRIBUTING.md).
+Consulte [como adicionar comandos e eventos](docs/bot-development.md), [arquitetura e segurança](docs/architecture.md), [privacidade operacional](docs/privacy.md) e [contribuição](CONTRIBUTING.md).
 
 ## Licença
 

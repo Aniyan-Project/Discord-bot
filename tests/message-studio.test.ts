@@ -7,7 +7,7 @@ import {
   validateStudioPayload,
   type StudioDraft,
 } from '../shared/message-studio.js'
-import { MessageStudio } from '../server/message-studio.js'
+import { MessageStudio } from '../server/bot/services/message-studio.js'
 import { AppError } from '../server/security.js'
 
 export function messageDraft(): StudioDraft {

@@ -4,6 +4,8 @@ O processo Node.js mantém o gateway Discord e o servidor Fastify. Em produção
 
 ## Comandos
 
+O código Discord está em `server/bot/`: `commands/` reúne um módulo por comando, com execução, aliases, opções slash e autocomplete; `core/` aplica políticas e despacha pelo registro tipado. `events/` registra os listeners, `handlers/` adapta as interações, `interactions/` mantém sessões temporárias e `presentation/` monta as respostas. O runtime apenas compõe essas camadas. Veja o [guia de extensão](bot-development.md) para adicionar comandos e eventos.
+
 Os adaptadores Discord convertem mensagens e interações em `Invocation`. O `CommandEngine` compartilha validação, cooldown, canais permitidos, regras por servidor e operações entre prefixo e slash. Respostas pessoais usam DM ou mensagens efêmeras. Componentes de confirmação são associados à pessoa e ao contexto original, consumidos uma única vez e expiram em cinco minutos.
 
 O bot pede apenas Guilds e, quando habilitado, GuildMessages/MessageContent. Não pede Presence ou Guild Members Intent. O convite não inclui Administrator. Autocomplete é limitado e possui prazo curto para não prender a interação.
