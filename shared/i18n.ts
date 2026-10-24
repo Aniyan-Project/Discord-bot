@@ -1,5 +1,31 @@
 import type { Locale } from './domain.js'
 const text = {
+  messageStudio: ['Criador de mensagens', 'Message builder', 'Creador de mensajes'],
+  studioChannelDenied: [
+    'Você e o bot precisam de Ver Canal, Enviar Mensagens e Inserir Links neste canal. Atualize a página para conferir os canais disponíveis.',
+    'You and the bot need View Channel, Send Messages and Embed Links in this channel. Refresh to check available channels.',
+    'Tú y el bot necesitan Ver canal, Enviar mensajes e Insertar enlaces en este canal. Actualiza para ver los canales disponibles.',
+  ],
+  studioWebhookDenied: [
+    'Você e o bot precisam de Gerenciar Webhooks no canal escolhido.',
+    'You and the bot need Manage Webhooks in the selected channel.',
+    'Tú y el bot necesitan Gestionar webhooks en el canal elegido.',
+  ],
+  studioMentionDenied: [
+    'Para notificar cargos ou @everyone/@here, você precisa da permissão Mencionar @everyone neste canal.',
+    'To notify roles or @everyone/@here you need Mention Everyone permission in this channel.',
+    'Para notificar roles o @everyone/@here necesitas Mencionar a todos en este canal.',
+  ],
+  studioInvalidMessage: [
+    'Mensagem inválida. Confira os limites, links HTTPS e a estrutura dos componentes.',
+    'Invalid message. Check limits, HTTPS links and component structure.',
+    'Mensaje inválido. Revisa los límites, enlaces HTTPS y estructura de componentes.',
+  ],
+  studioDeliveryUncertain: [
+    'Não foi possível confirmar o envio. Confira o canal no Discord antes de tentar uma nova mensagem; esta tentativa não será repetida automaticamente.',
+    'Delivery could not be confirmed. Check the Discord channel before starting a new message; this attempt will not be repeated automatically.',
+    'No se pudo confirmar el envío. Revisa el canal de Discord antes de iniciar otro mensaje; este intento no se repetirá automáticamente.',
+  ],
   home: ['Início', 'Home', 'Inicio'],
   dashboard: ['Painel', 'Dashboard', 'Panel'],
   commands: ['Comandos', 'Commands', 'Comandos'],

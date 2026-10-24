@@ -14,6 +14,8 @@ import { DiscordAuth } from './discord-auth.js'
 import { BotRuntime } from './bot.js'
 import { AppError, constantEqual, hashToken, requireOrigin } from './security.js'
 import { guildSettingsSchema, type GuildSummary, type SessionView } from '../shared/domain.js'
+import { parseStudioDraft } from '../shared/message-studio.js'
+import { MessageStudio } from './message-studio.js'
 const snowflake = z.string().regex(/^\d{17,20}$/)
 const mediaId = z.string().regex(/^[1-9]\d{0,19}$/)
 const status = z.enum(['PLANNING', 'CURRENT', 'COMPLETED', 'PAUSED', 'DROPPED'])
@@ -26,6 +28,7 @@ interface Dependencies {
   api: BranilistService
   discord: DiscordAuth
   bot: BotRuntime
+  studio: MessageStudio
 }
 export async function createApp(config: Config, overrides: Partial<Dependencies> = {}) {
   const store =
@@ -38,6 +41,7 @@ export async function createApp(config: Config, overrides: Partial<Dependencies>
   const api = overrides.api ?? new BranilistService(config, store)
   const discord = overrides.discord ?? new DiscordAuth(config, store)
   const bot = overrides.bot ?? new BotRuntime(config, store, api)
+  const studio = overrides.studio ?? new MessageStudio(bot.client, config.DEMO_MODE)
   const app = Fastify({
     bodyLimit: 32768,
     logger:
@@ -213,6 +217,78 @@ export async function createApp(config: Config, overrides: Partial<Dependencies>
     const { id } = await requireGuild(request)
     return store.events(id)
   })
+  app.get('/api/guilds/:id/message-studio', async (request) => {
+    const { id, session: actor } = await requireGuild(request)
+    return {
+      ...(await studio.context(id, actor.user, store.settings(id).settings.locale)),
+      ...store.studioDraft(id, actor.user.id),
+    }
+  })
+  app.put('/api/guilds/:id/message-studio/draft', { bodyLimit: 262144 }, async (request) => {
+    csrf(request)
+    const { id, session: actor } = await requireGuild(request)
+    const body = z
+      .object({ draft: z.unknown(), revision: z.number().int().min(0) })
+      .strict()
+      .parse(request.body)
+    let draft
+    try {
+      draft = parseStudioDraft(body.draft)
+    } catch {
+      throw new AppError(400, 'studioInvalidMessage')
+    }
+    return store.withGuildLock(id, async () => store.saveStudioDraft(id, actor.user.id, draft, body.revision))
+  })
+  app.post(
+    '/api/guilds/:id/message-studio/send',
+    { bodyLimit: 262144, config: { rateLimit: { max: 6, timeWindow: '1 minute' } } },
+    async (request) => {
+      csrf(request)
+      const { id, session: actor } = await requireGuild(request)
+      const body = z.object({ draft: z.unknown(), requestId: z.uuid() }).strict().parse(request.body)
+      let draft
+      try {
+        draft = parseStudioDraft(body.draft)
+      } catch {
+        throw new AppError(400, 'studioInvalidMessage')
+      }
+      return store.withGuildLock(id, async () => {
+        const fingerprint = hashToken(JSON.stringify(draft))
+        const before = store.studioDelivery(id, body.requestId)
+        if (before) {
+          if (before.actor_id !== actor.user.id || before.fingerprint !== fingerprint)
+            throw new AppError(409, 'revisionConflict')
+          if (!before.result) throw new AppError(409, 'studioDeliveryUncertain')
+          const result = JSON.parse(before.result) as { error?: string; status?: number }
+          if (result.error) throw new AppError(result.status ?? 502, result.error)
+          return result
+        }
+        store.beginStudioDelivery(id, body.requestId, actor.user.id, fingerprint)
+        try {
+          const result = await studio.send(
+            id,
+            actor.user,
+            store.settings(id).settings.locale,
+            draft,
+            body.requestId,
+          )
+          store.finishStudioDelivery(id, body.requestId, result)
+          store.event(id, 'message-studio', true)
+          return result
+        } catch (error) {
+          if (error instanceof AppError && error.status < 500 && error.code !== 'studioDeliveryUncertain') {
+            store.cancelStudioDelivery(id, body.requestId)
+          } else
+            store.finishStudioDelivery(id, body.requestId, {
+              error: error instanceof AppError ? error.code : 'studioDeliveryUncertain',
+              status: error instanceof AppError ? error.status : 502,
+            })
+          store.event(id, 'message-studio', false)
+          throw error
+        }
+      })
+    },
+  )
   app.get('/api/account/profile', async (request) => {
     const value = session(request)
     const username = z
@@ -380,6 +456,7 @@ export async function createApp(config: Config, overrides: Partial<Dependencies>
   cleanup.unref()
   app.addHook('onClose', async () => {
     clearInterval(cleanup)
+    studio.close()
     await bot.close()
     store.close()
   })

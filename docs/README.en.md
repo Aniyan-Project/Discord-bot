@@ -4,6 +4,10 @@ An open-source Discord companion built with the published `@aniyan-project/brani
 
 ## Try locally
 
+The dashboard also includes a **Message builder** with classic embeds or Components V2, live preview, server/sender variables, JSON import/export and a persistent draft per user/server. Send as the bot or a webhook with custom name/avatar URL. Both you and the bot need View Channel, Send Messages and Embed Links; webhooks additionally require Manage Webhooks in the destination channel. Mentions default to off. Review the message before confirming delivery. Demo mode only simulates sending. See the [complete builder guide](message-builder.md) (Portuguese).
+
+The local demo API uses port 4101; the website remains on 5173, avoiding the production port 4100.
+
 Requires Node.js 24.17+:
 
 ```sh

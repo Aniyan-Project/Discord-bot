@@ -1,4 +1,14 @@
-import { StrictMode, useEffect, useRef, useState, createContext, useContext, type ReactNode } from 'react'
+import {
+  StrictMode,
+  Suspense,
+  lazy,
+  useEffect,
+  useRef,
+  useState,
+  createContext,
+  useContext,
+  type ReactNode,
+} from 'react'
 import { createRoot } from 'react-dom/client'
 import {
   createBrowserRouter,
@@ -61,6 +71,9 @@ import {
   PageTitle,
 } from './components.js'
 import { SettingsPage } from './settings.js'
+const MessageStudioPage = lazy(() =>
+  import('./message-studio.js').then((module) => ({ default: module.MessageStudioPage })),
+)
 import { CatalogPage, AccountPage, ActivityPage } from './pages.js'
 import { commandDescriptions, t } from '../shared/i18n.js'
 import { commandIds, defaultSettings, type GuildSummary } from '../shared/domain.js'
@@ -418,6 +431,10 @@ function DashboardLayout() {
               <Settings2 size={18} />
               {tr('configuration')}
             </NavLink>
+            <NavLink to={`${base}/messages`}>
+              <MessageSquareText size={18} />
+              {tr('messageStudio')}
+            </NavLink>
             <NavLink to={`${base}/catalog`}>
               <Search size={18} />
               {tr('catalog')}
@@ -747,6 +764,14 @@ const router = createBrowserRouter([
             children: [
               { index: true, element: <OverviewPage /> },
               { path: 'settings', element: <SettingsPage /> },
+              {
+                path: 'messages',
+                element: (
+                  <Suspense fallback={<Loading />}>
+                    <MessageStudioPage />
+                  </Suspense>
+                ),
+              },
               { path: 'catalog', element: <CatalogPage /> },
               { path: 'activity', element: <ActivityPage /> },
             ],

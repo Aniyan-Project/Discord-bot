@@ -2,15 +2,17 @@
 
 Este documento descreve o comportamento do código. Cada operador deve disponibilizar suas próprias informações de contato e política aplicável à sua instalação.
 
-| Dado                                                            | Finalidade                                     | Retenção implementada                                           |
-| --------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------- |
-| ID/nome/avatar Discord da sessão                                | Identificar a pessoa no dashboard              | Sessão de até 7 dias                                            |
-| Tokens OAuth Discord                                            | Consultar os servidores gerenciáveis           | Sessão de até 7 dias, criptografados                            |
-| Tokens OAuth Branilist e dados básicos do vínculo               | Executar operações autorizadas da pessoa       | Até desvincular, revogar ou invalidar o vínculo; criptografados |
-| States/verifiers OAuth                                          | Proteger a autorização                         | Até consumo ou 10 minutos                                       |
-| Configurações por servidor                                      | Prefixo, idioma, canais e recursos habilitados | Enquanto a instalação mantiver o banco                          |
-| Metadados de uso de comandos                                    | Diagnóstico operacional                        | 30 dias                                                         |
-| ID do administrador e nomes de campos de configuração alterados | Auditoria de configuração                      | 90 dias                                                         |
+| Dado                                                               | Finalidade                                     | Retenção implementada                                           |
+| ------------------------------------------------------------------ | ---------------------------------------------- | --------------------------------------------------------------- |
+| ID/nome/avatar Discord da sessão                                   | Identificar a pessoa no dashboard              | Sessão de até 7 dias                                            |
+| Tokens OAuth Discord                                               | Consultar os servidores gerenciáveis           | Sessão de até 7 dias, criptografados                            |
+| Tokens OAuth Branilist e dados básicos do vínculo                  | Executar operações autorizadas da pessoa       | Até desvincular, revogar ou invalidar o vínculo; criptografados |
+| States/verifiers OAuth                                             | Proteger a autorização                         | Até consumo ou 10 minutos                                       |
+| Configurações por servidor                                         | Prefixo, idioma, canais e recursos habilitados | Enquanto a instalação mantiver o banco                          |
+| Metadados de uso de comandos                                       | Diagnóstico operacional                        | 30 dias                                                         |
+| ID do administrador e nomes de campos de configuração alterados    | Auditoria de configuração                      | 90 dias                                                         |
+| Rascunho do criador, incluindo textos e URLs                       | Continuar a edição por pessoa e servidor       | Até substituição ou remoção pelo operador                       |
+| Identificador/fingerprint da tentativa, autor e resultado do envio | Evitar mensagens duplicadas                    | 7 dias                                                          |
 
 A limpeza ocorre na inicialização e a cada hora. O código não salva conteúdo de mensagens, termos de busca nem respostas da API no histórico operacional. Pesquisas públicas podem ficar por até 30 segundos em cache na memória do processo, limitado a 100 entradas.
 

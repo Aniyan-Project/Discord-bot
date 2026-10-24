@@ -9,6 +9,7 @@ import {
   type LinkedAccount,
 } from '../shared/domain.js'
 import { Vault, hashToken, randomToken } from './security.js'
+import { parseStudioDraft, type StudioDraft } from '../shared/message-studio.js'
 export interface DiscordTokens {
   access_token: string
   refresh_token: string
@@ -52,6 +53,8 @@ export class Store {
       CREATE TABLE IF NOT EXISTS command_events (id INTEGER PRIMARY KEY, guild_id TEXT NOT NULL, command TEXT NOT NULL, ok INTEGER NOT NULL, at INTEGER NOT NULL);
       CREATE INDEX IF NOT EXISTS events_guild_time ON command_events(guild_id,at);
       CREATE TABLE IF NOT EXISTS audit_events (id INTEGER PRIMARY KEY, guild_id TEXT NOT NULL, actor_id TEXT NOT NULL, changed_fields TEXT NOT NULL, at INTEGER NOT NULL);
+      CREATE TABLE IF NOT EXISTS studio_drafts (guild_id TEXT NOT NULL, actor_id TEXT NOT NULL, payload TEXT NOT NULL, revision INTEGER NOT NULL, PRIMARY KEY(guild_id,actor_id));
+      CREATE TABLE IF NOT EXISTS studio_deliveries (guild_id TEXT NOT NULL, request_id TEXT NOT NULL, actor_id TEXT NOT NULL, fingerprint TEXT NOT NULL, result TEXT, at INTEGER NOT NULL, PRIMARY KEY(guild_id,request_id));
       PRAGMA user_version=1;`)
     this.cleanup()
   }
@@ -61,6 +64,43 @@ export class Store {
     return row
       ? { settings: guildSettingsSchema.parse(JSON.parse(row.payload)), revision: row.revision }
       : { settings: { ...defaultSettings, ...this.defaults }, revision: 0 }
+  }
+  studioDraft(guildId: string, actorId: string): { draft: StudioDraft | null; revision: number } {
+    const row = this.db
+      .prepare('SELECT payload,revision FROM studio_drafts WHERE guild_id=? AND actor_id=?')
+      .get(guildId, actorId) as { payload: string; revision: number } | undefined
+    return row
+      ? { draft: parseStudioDraft(JSON.parse(row.payload)), revision: row.revision }
+      : { draft: null, revision: 0 }
+  }
+  saveStudioDraft(guildId: string, actorId: string, draft: StudioDraft, revision: number) {
+    if (this.studioDraft(guildId, actorId).revision !== revision) throw Error('revisionConflict')
+    this.db
+      .prepare(
+        'INSERT INTO studio_drafts VALUES(?,?,?,?) ON CONFLICT(guild_id,actor_id) DO UPDATE SET payload=excluded.payload,revision=excluded.revision',
+      )
+      .run(guildId, actorId, JSON.stringify(draft), revision + 1)
+    return { revision: revision + 1 }
+  }
+  studioDelivery(guildId: string, requestId: string) {
+    return this.db
+      .prepare('SELECT actor_id,fingerprint,result FROM studio_deliveries WHERE guild_id=? AND request_id=?')
+      .get(guildId, requestId) as { actor_id: string; fingerprint: string; result: string | null } | undefined
+  }
+  beginStudioDelivery(guildId: string, requestId: string, actorId: string, fingerprint: string) {
+    this.db
+      .prepare('INSERT INTO studio_deliveries VALUES(?,?,?,?,NULL,?)')
+      .run(guildId, requestId, actorId, fingerprint, Date.now())
+  }
+  finishStudioDelivery(guildId: string, requestId: string, result: unknown) {
+    this.db
+      .prepare('UPDATE studio_deliveries SET result=? WHERE guild_id=? AND request_id=?')
+      .run(JSON.stringify(result), guildId, requestId)
+  }
+  cancelStudioDelivery(guildId: string, requestId: string) {
+    this.db
+      .prepare('DELETE FROM studio_deliveries WHERE guild_id=? AND request_id=? AND result IS NULL')
+      .run(guildId, requestId)
   }
   async withGuildLock<T>(id: string, action: () => Promise<T>): Promise<T> {
     const previous = this.guildLocks.get(id) ?? Promise.resolve()
@@ -199,6 +239,7 @@ export class Store {
     this.db.prepare('DELETE FROM oauth_states WHERE expires_at<=?').run(now)
     this.db.prepare('DELETE FROM command_events WHERE at<?').run(now - 30 * 86400000)
     this.db.prepare('DELETE FROM audit_events WHERE at<?').run(now - 90 * 86400000)
+    this.db.prepare('DELETE FROM studio_deliveries WHERE at<?').run(now - 7 * 86400000)
   }
   close(): void {
     this.db.close()

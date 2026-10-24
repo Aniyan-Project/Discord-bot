@@ -4,6 +4,10 @@ Un compañero de Discord de código abierto, construido con el paquete npm publi
 
 ## Probar localmente
 
+El dashboard también incluye un **Creador de mensajes** con embeds clásicos o Components V2, vista en vivo, variables del servidor/remitente, importación/exportación JSON y un borrador persistente por usuario/servidor. Envía como bot o webhook con nombre y URL de avatar personalizados. Tú y el bot necesitan Ver canal, Enviar mensajes e Insertar enlaces; los webhooks también requieren Gestionar webhooks en el canal de destino. Las menciones están desactivadas inicialmente. Revisa el mensaje antes de confirmar. En modo demo solo se simula el envío. Consulta la [guía completa](message-builder.md) (portugués).
+
+La API de demostración local usa el puerto 4101 y el sitio el 5173, evitando el puerto 4100 de producción.
+
 Requiere Node.js 24.17+:
 
 ```sh

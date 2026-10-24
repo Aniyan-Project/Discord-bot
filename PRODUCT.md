@@ -30,6 +30,8 @@ Prefix and slash commands; Discord login for dashboard access; optional Branilis
 
 Public open-source repository Aniyan-Project/Discord-bot. Prefix is configurable. Genuine deployment requires operator-owned Discord and Branilist OAuth credentials. No credentials or production adoption metrics have been supplied. A local demo must be clearly identified and must not claim a live connection.
 
+- Authorized server managers can compose classic embeds or Components V2 with a live preview, authenticated variables, JSON import/export and SQLite drafts scoped to their user and server, then review delivery through the bot or a managed webhook. The creator supports Portuguese, English and Spanish; demo sends remain simulated.
+
 ## Brand Commitments
 
 Name confirmed by the user: Branilist Bot. Use delfus.app and the supplied dashboard screenshot as inspiration for navigation and configuration organization; do not copy its design, mascot, wording or unrelated moderation features.

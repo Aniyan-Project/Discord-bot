@@ -12,6 +12,7 @@ Português · English · Español — [English setup](docs/README.en.md) · [Gu�
 - Prefixo, idioma, apelido, cor, títulos, sinopses, capas, cooldown, canais e comandos configuráveis por servidor.
 - Login do dashboard pelo Discord e verificação da permissão **Gerenciar Servidor** em cada acesso aos dados de um servidor.
 - Site e dashboard responsivos em Português, Inglês e Espanhol, com prévia das respostas, busca, paginação, estados de erro e confirmação de ações destrutivas.
+- [Criador de mensagens](docs/message-builder.md) com embeds clássicos ou Components V2, variáveis, importação/exportação JSON, rascunhos persistentes e envio pelo bot ou webhook com nome/avatar configuráveis.
 - OAuth/PKCE do Branilist, tokens criptografados em repouso, proteção CSRF, sessões persistentes e histórico operacional sem conteúdo de mensagens.
 - SQLite, instalação via Docker, CI e testes de API, comandos, SDK, navegador e acessibilidade.
 

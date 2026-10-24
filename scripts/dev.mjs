@@ -6,7 +6,14 @@ const env = {
   ...process.env,
   NODE_ENV: 'development',
   ...(demo
-    ? { DEMO_MODE: 'true', DATABASE_PATH: ':memory:', APP_URL: 'http://localhost:5173', HOST: '127.0.0.1' }
+    ? {
+        DEMO_MODE: 'true',
+        DATABASE_PATH: ':memory:',
+        APP_URL: 'http://localhost:5173',
+        HOST: '127.0.0.1',
+        PORT: '4101',
+        VITE_API_PORT: '4101',
+      }
     : {}),
 }
 const children = [
