@@ -214,7 +214,8 @@ test('settings writes validate channels, reject stale revisions and do not accep
 test('Discord OAuth state is browser-bound, single-use and rotates the login session', async () => {
   const { app, session, store } = await liveTestApp()
   try {
-    const start = await app.inject({ url: '/auth/discord' })
+    const returnTo = '/transcripts/1100000000000000001/00000000-0000-4000-8000-000000000000'
+    const start = await app.inject({ url: '/auth/discord?returnTo=' + encodeURIComponent(returnTo) })
     assert.equal(start.statusCode, 302)
     const state = new URL(start.headers.location as string).searchParams.get('state')!
     const stateCookie = `branilist.discord-state=${state}`
@@ -227,7 +228,7 @@ test('Discord OAuth state is browser-bound, single-use and rotates the login ses
       url: `/auth/discord/callback?code=fake&state=${state}`,
       headers: { cookie: `${stateCookie}; branilist.sid=${session.id}` },
     })
-    assert.equal(valid.headers.location, '/dashboard')
+    assert.equal(valid.headers.location, returnTo)
     assert.equal(store.session(session.id), null)
     const cookies = Array.isArray(valid.headers['set-cookie'])
       ? valid.headers['set-cookie']
@@ -340,6 +341,27 @@ test('invite requests no Administrator permission', async () => {
     const url = new URL(discord.inviteURL()!)
     assert.equal(BigInt(url.searchParams.get('permissions')!) & 8n, 0n)
     assert.equal(url.searchParams.get('scope'), 'bot applications.commands')
+  } finally {
+    await app.close()
+  }
+})
+
+test('Discord OAuth ignores return destinations outside transcript pages', async () => {
+  const { app } = await liveTestApp()
+  try {
+    for (const returnTo of [
+      'https://evil.example',
+      '//evil.example',
+      '/dashboard?next=https://evil.example',
+    ]) {
+      const start = await app.inject({ url: '/auth/discord?returnTo=' + encodeURIComponent(returnTo) })
+      const state = new URL(start.headers.location as string).searchParams.get('state')!
+      const result = await app.inject({
+        url: `/auth/discord/callback?code=fake&state=${state}`,
+        headers: { cookie: `branilist.discord-state=${state}` },
+      })
+      assert.equal(result.headers.location, '/dashboard')
+    }
   } finally {
     await app.close()
   }

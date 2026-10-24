@@ -343,7 +343,11 @@ export class TicketService {
   }
   async transcript(guild: string, user: string, id: string) {
     const t = this.record(guild, id)
-    if (t.authorId === user && this.repo.settings(guild).settings.authorTranscript)
+    const current = this.repo.settings(guild).settings
+    if (
+      t.authorId === user &&
+      (current.authorTranscript || (current.dmTranscript && t.settings.dmTranscript && t.status === 'closed'))
+    )
       await this.discord.actor(guild, user)
     else await this.staff(t, user)
     const stored = this.repo.readTranscript(guild, id)

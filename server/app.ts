@@ -17,6 +17,7 @@ import { guildSettingsSchema, type GuildSummary, type SessionView } from '../sha
 import { parseStudioDraft } from '../shared/message-studio.js'
 import { MessageStudio } from './bot/services/message-studio.js'
 import { registerTicketRoutes } from './tickets/routes.js'
+import { transcriptReturnTo } from './tickets/links.js'
 const snowflake = z.string().regex(/^\d{17,20}$/)
 const mediaId = z.string().regex(/^[1-9]\d{0,19}$/)
 const status = z.enum(['PLANNING', 'CURRENT', 'COMPLETED', 'PAUSED', 'DROPPED'])
@@ -338,10 +339,12 @@ export async function createApp(config: Config, overrides: Partial<Dependencies>
   app.get(
     '/auth/discord',
     { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
-    async (_request, reply) => {
-      if (config.DEMO_MODE) return reply.redirect('/dashboard')
+    async (request, reply) => {
+      const query = z.object({ returnTo: z.string().max(200).optional() }).parse(request.query)
+      const returnTo = transcriptReturnTo(query.returnTo)
+      if (config.DEMO_MODE) return reply.redirect(returnTo ?? '/dashboard')
       if (!config.DISCORD_CLIENT_ID) throw new AppError(503, 'oauthUnavailable')
-      const state = store.createState('discord', {})
+      const state = store.createState('discord', { returnTo })
       reply.setCookie('branilist.discord-state', state, {
         ...cookieOptions,
         path: '/auth/discord',
@@ -365,18 +368,19 @@ export async function createApp(config: Config, overrides: Partial<Dependencies>
         !query.state ||
         !browserState ||
         !constantEqual(query.state, browserState) ||
-        !store.takeState(query.state, 'discord') ||
         query.error ||
         !query.code
       )
         throw new AppError(400, 'oauthFailed')
+      const state = store.takeState<{ returnTo?: string }>(query.state, 'discord')
+      if (!state) throw new AppError(400, 'oauthFailed')
       const tokens = await discord.exchangeCode(query.code)
       const user = await discord.user(tokens.access_token)
       const old = request.cookies[sessionCookie]
       if (old) store.deleteSession(old)
       const value = store.createSession(user, tokens)
       reply.setCookie(sessionCookie, value.id, { ...cookieOptions, maxAge: 7 * 86400 })
-      return reply.redirect('/dashboard')
+      return reply.redirect(transcriptReturnTo(state.returnTo) ?? '/dashboard')
     } catch {
       return reply.redirect('/?auth=failed')
     }

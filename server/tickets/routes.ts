@@ -4,12 +4,33 @@ import { ticketId, discordId } from '../../shared/tickets.js'
 import type { TicketService } from '../bot/tickets/service.js'
 import type { Session } from '../store.js'
 import { renderTranscript } from './transcript.js'
+import { transcriptPath } from './links.js'
+import { AppError } from '../security.js'
 export function registerTicketRoutes(
   app: FastifyInstance,
   service: TicketService,
   auth: (r: FastifyRequest) => Session,
   csrf: (r: FastifyRequest) => Session,
 ) {
+  app.get('/transcripts/:id/:ticketId', async (r, reply) => {
+    reply.header('cache-control', 'no-store').header('x-robots-tag', 'noindex, nofollow')
+    const p = z.object({ id: discordId, ticketId }).parse(r.params)
+    let actor: Session
+    try {
+      actor = auth(r)
+    } catch (error) {
+      if (error instanceof AppError && error.status === 401)
+        return reply.redirect(
+          '/auth/discord?returnTo=' + encodeURIComponent(transcriptPath(p.id, p.ticketId)),
+        )
+      throw error
+    }
+    const rendered = renderTranscript(await service.transcriptDocument(p.id, actor.user.id, p.ticketId))
+    return reply
+      .header('content-security-policy', rendered.csp)
+      .type('text/html; charset=utf-8')
+      .send(rendered.html)
+  })
   app.post('/api/guilds/:id/tickets/panels/:ticketId/reconcile', async (r) => {
     const actor = csrf(r),
       p = z.object({ id: discordId, ticketId }).parse(r.params),

@@ -379,13 +379,7 @@ function TicketDetail({
             </Btn>
           )}
           <Btn
-            onClick={() =>
-              window.open(
-                `/api/guilds/${guildId}/tickets/${t.id}/transcript/view`,
-                '_blank',
-                'noopener,noreferrer',
-              )
-            }
+            onClick={() => window.open(`/transcripts/${guildId}/${t.id}`, '_blank', 'noopener,noreferrer')}
           >
             {tr('Ver transcrição')}
           </Btn>

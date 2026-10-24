@@ -16,6 +16,15 @@ import {
 } from 'discord.js'
 import type { TicketPanel, TicketRecord } from '../../../shared/tickets.js'
 import { tt } from '../../../shared/ticket-i18n.js'
+import { transcriptUrl } from '../../tickets/links.js'
+export function transcriptLinkRow(origin: string, guild: string, ticket: string, locale: string) {
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setStyle(ButtonStyle.Link)
+      .setLabel(tt(locale, 'Ver transcrição'))
+      .setURL(transcriptUrl(origin, guild, ticket)),
+  )
+}
 export function panelPayload(panel: TicketPanel, locale: string): MessageCreateOptions {
   const row = new ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>()
   if (panel.style === 'select') {

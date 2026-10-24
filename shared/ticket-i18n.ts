@@ -206,6 +206,10 @@ const copy: Record<string, [string, string]> = {
   'Encerrar ticket': ['Close ticket', 'Cerrar ticket'],
   'Motivo do encerramento': ['Closing reason', 'Motivo de cierre'],
   'Reabrir ticket': ['Reopen ticket', 'Reabrir ticket'],
+  'Abra a transcrição no site pelo botão abaixo.': [
+    'Open the transcript on the website using the button below.',
+    'Abre la transcripción en el sitio con el botón de abajo.',
+  ],
   Transcrição: ['Transcript', 'Transcripción'],
   'Exportar transcrição': ['Export transcript', 'Exportar transcripción'],
   'Notas internas': ['Internal notes', 'Notas internas'],

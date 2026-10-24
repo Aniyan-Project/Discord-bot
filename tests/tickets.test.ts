@@ -13,6 +13,7 @@ import {
   type TicketRecord,
   type TicketPanel,
 } from '../shared/tickets.js'
+import { ticketInteractionHandler } from '../server/bot/tickets/interactions.js'
 import { panelPayload, ticketControls, ticketLogPayload } from '../server/bot/tickets/messages.js'
 const guild = '1100000000000000001',
   manager = '1000000000000000001',
@@ -34,7 +35,7 @@ export class FakeTicketDiscord extends TicketDiscord {
   accessCalls: TicketRecord[] = []
   closed = false
   constructor() {
-    super(new Client({ intents: [] }), false, true)
+    super(new Client({ intents: [] }), false, true, 'https://bot.example')
   }
   override async actor(g: string, id: string) {
     const p = this.people.get(id)
@@ -409,6 +410,79 @@ test('ticket logs are embeds, preserve original channel names and never ping use
     assert.deepEqual(payload.allowedMentions, { parse: [] })
     assert.equal(payload.components!.length, 1)
     assert.equal(ticketControls({ ...t, status: 'closed' }).toJSON().components[0]!.disabled, true)
+  } finally {
+    f.close()
+  }
+})
+
+test('DM transcripts send website buttons without files and author access can be revoked', async () => {
+  const f = await ticketFixture()
+  try {
+    const current = f.service.repo.settings(guild)
+    await f.service.saveSettings(
+      guild,
+      manager,
+      { ...current.settings, authorTranscript: false, dmTranscript: true },
+      current.revision,
+    )
+    const t = await f.service.open(guild, author, f.panel.id, f.panel.topics[0]!.id, f.answers)
+    await assert.rejects(f.service.transcript(guild, author, t.id), { status: 403 })
+    const closed = await f.service.action(guild, manager, t.id, 'close', 'Resolved')
+    assert.ok((await f.service.transcript(guild, author, t.id)).messages.length)
+    await assert.rejects(f.service.transcript(guild, other, t.id), { status: 403 })
+    const gateway = new TicketDiscord(f.discord.client, false, true, 'https://bot.example')
+    let sent: any
+    gateway.client.users.fetch = (async () => ({
+      send: async (payload: unknown) => {
+        sent = payload
+      },
+    })) as never
+    await gateway.dm(closed, await f.service.transcript(guild, manager, t.id))
+    assert.equal(sent.files, undefined)
+    const button = sent.components[0].toJSON().components[0]
+    assert.equal(button.style, 5)
+    assert.equal(button.url, `https://bot.example/transcripts/${guild}/${t.id}`)
+    const settings = f.service.repo.settings(guild)
+    await f.service.saveSettings(
+      guild,
+      manager,
+      { ...settings.settings, dmTranscript: false },
+      settings.revision,
+    )
+    await assert.rejects(f.service.transcript(guild, author, t.id), { status: 403 })
+  } finally {
+    f.close()
+  }
+})
+
+test('Discord transcript action returns a website button only after authorization', async () => {
+  const f = await ticketFixture()
+  try {
+    const t = await f.service.open(guild, author, f.panel.id, f.panel.topics[0]!.id, f.answers)
+    const replies: any[] = []
+    const interaction = {
+      guildId: guild,
+      user: { id: support },
+      customId: `ticket:transcript:${t.id}`,
+      isButton: () => true,
+      isStringSelectMenu: () => false,
+      isModalSubmit: () => false,
+      deferred: true,
+      deferReply: async () => {},
+      editReply: async (p: unknown) => {
+        replies.push(p)
+      },
+    }
+    await ticketInteractionHandler(f.service).handle(interaction as never)
+    assert.equal(replies[0].files, undefined)
+    assert.equal(
+      replies[0].components[0].toJSON().components[0].url,
+      `https://bot.example/transcripts/${guild}/${t.id}`,
+    )
+    interaction.user.id = other
+    await ticketInteractionHandler(f.service).handle(interaction as never)
+    assert.equal(replies[1].components, undefined)
+    assert.equal(replies[1].files, undefined)
   } finally {
     f.close()
   }

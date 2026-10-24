@@ -4,7 +4,6 @@ import {
   TextInputBuilder,
   TextInputStyle,
   MessageFlags,
-  AttachmentBuilder,
   type Interaction,
 } from 'discord.js'
 import type { TicketService } from './service.js'
@@ -12,8 +11,7 @@ import { AppError } from '../../security.js'
 import { tt } from '../../../shared/ticket-i18n.js'
 import type { InteractionHandler } from '../handlers/types.js'
 import { openingForm, formAnswers } from './forms.js'
-import { renderTranscript } from '../../tickets/transcript.js'
-import { ticketControls } from './messages.js'
+import { ticketControls, transcriptLinkRow } from './messages.js'
 const messages: Record<string, string> = {
   invalidInput: 'Revise a resposta e os limites deste campo.',
   ticketLimit: 'Limite de tickets atingido. Aguarde um atendimento ser encerrado.',
@@ -105,20 +103,10 @@ export function ticketInteractionHandler(service: TicketService): InteractionHan
           }
           await service.action(guild, user, id, 'close', i.fields.getTextInputValue('reason'))
         } else if (action === 'transcript') {
-          const data = await service.transcriptDocument(guild, user, id)
-          const file = Buffer.from(renderTranscript(data).html)
-          if (file.length > i.attachmentSizeLimit) {
-            await i.editReply({
-              content: `${tr('Abra o visualizador autenticado para esta transcrição.')} ${service.discord.appUrl}/api/guilds/${guild}/tickets/${id}/transcript/view`,
-            })
-            return
-          }
+          await service.transcript(guild, user, id)
           await i.editReply({
-            files: [
-              new AttachmentBuilder(file, {
-                name: `ticket-${data.ticket.number}.html`,
-              }),
-            ],
+            content: tr('Abra a transcrição no site pelo botão abaixo.'),
+            components: [transcriptLinkRow(service.discord.appUrl, guild, id, locale)],
           })
           return
         } else throw new AppError(400, 'invalidInput')

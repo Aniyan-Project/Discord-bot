@@ -67,7 +67,7 @@ test('authenticated transcript renders real messages, searches, exports HTML/JSO
   ).toBeTruthy()
   const errors: string[] = []
   page.on('pageerror', (e) => errors.push(e.message))
-  await page.goto(base + '/' + opened.id + '/transcript/view')
+  await page.goto(`/transcripts/1100000000000000001/${opened.id}`)
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Minha conta')
   await expect(page.locator('.timeline')).toContainText('Conversa de demonstração.')
   await expect(page.locator('body')).not.toContainText('SECRET STAFF NOTE')

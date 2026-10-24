@@ -1,7 +1,6 @@
 import {
   ChannelType,
   PermissionFlagsBits as P,
-  AttachmentBuilder,
   escapeMarkdown,
   type Client,
   type TextChannel,
@@ -21,9 +20,8 @@ import type {
 import { ticketVariables } from '../../../shared/tickets.js'
 import { tt } from '../../../shared/ticket-i18n.js'
 import { displayAnswer } from '../../../shared/ticket-forms.js'
-import { documentFor, renderTranscript } from '../../tickets/transcript.js'
 import { AppError } from '../../security.js'
-import { panelPayload, ticketControls, ticketLogPayload } from './messages.js'
+import { panelPayload, ticketControls, ticketLogPayload, transcriptLinkRow } from './messages.js'
 export interface TicketActor {
   id: string
   name: string
@@ -475,16 +473,12 @@ export class TicketDiscord {
   async remove(t: TicketRecord) {
     if (!this.demo) await (await this.channel(t)).delete('Ticket closed after transcript')
   }
-  async dm(t: TicketRecord, transcript: Transcript) {
+  async dm(t: TicketRecord, _transcript: Transcript) {
     if (this.demo) return
     const user = await this.client.users.fetch(t.authorId)
     await user.send({
       content: `${tt(t.settings.locale, 'Transcrição')} #${t.number}`,
-      files: [
-        new AttachmentBuilder(Buffer.from(renderTranscript(documentFor(t, transcript)).html), {
-          name: `ticket-${t.number}.html`,
-        }),
-      ],
+      components: [transcriptLinkRow(this.appUrl, t.guildId, t.id, t.settings.locale)],
       allowedMentions: { parse: [] },
     })
   }

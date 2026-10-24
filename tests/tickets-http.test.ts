@@ -21,6 +21,11 @@ test('ticket HTTP routes require a session, CSRF token and valid bounded input',
   try {
     const r = await production.app.inject({ url: `/api/guilds/${guild}/tickets/context` })
     assert.equal(r.statusCode, 401)
+    const path = `/transcripts/${guild}/00000000-0000-4000-8000-000000000000`
+    const redirect = await production.app.inject({ url: path })
+    assert.equal(redirect.statusCode, 302)
+    assert.equal(redirect.headers.location, '/auth/discord?returnTo=' + encodeURIComponent(path))
+    assert.equal(redirect.headers['cache-control'], 'no-store')
     for (const format of ['view', 'html']) {
       assert.equal(
         (
@@ -124,6 +129,11 @@ test('HTML viewer and download use fresh authorization, nonce CSP and retention 
     assert.match(String(page.headers['content-security-policy']), /font-src data:/)
     assert.equal(page.headers['cache-control'], 'no-store')
     assert.ok(!page.body.includes('SECRET NOTE NEVER EXPORTED'))
+    const website = await runtime.app.inject({ url: `/transcripts/${guild}/${opened.id}` })
+    assert.equal(website.statusCode, 200)
+    assert.equal(website.headers['content-disposition'], undefined)
+    assert.equal(website.headers['cache-control'], 'no-store')
+    assert.ok(!website.body.includes('SECRET NOTE NEVER EXPORTED'))
     const file = await runtime.app.inject({ url: base + '/html' })
     assert.equal(file.statusCode, 200)
     assert.match(String(file.headers['content-disposition']), /attachment; filename="ticket-.*\.html"/)
