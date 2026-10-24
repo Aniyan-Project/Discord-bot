@@ -1,5 +1,9 @@
 import type { Locale } from './domain.js'
 const copy: Record<string, [string, string]> = {
+  'Buscar cargos': ['Search roles', 'Buscar roles'],
+  'Nenhum cargo encontrado.': ['No roles found.', 'No se encontraron roles.'],
+  Selecionados: ['Selected', 'Seleccionados'],
+  'Salvar cargos': ['Save roles', 'Guardar roles'],
   Publicado: ['Published', 'Publicado'],
   Rascunho: ['Draft', 'Borrador'],
   'JSON inválido.': ['Invalid JSON.', 'JSON no válido.'],

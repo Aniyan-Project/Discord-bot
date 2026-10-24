@@ -26,7 +26,7 @@ import { Btn, Field, Input, Modal, download, Section } from './primitives.js'
 import { TicketEditor } from './editor.js'
 import { TicketPreview } from './preview.js'
 import { TicketHistory } from './history.js'
-import { TicketSettingsPage } from './settings.js'
+import { TicketSettingsPage, TicketRoleSettings } from './settings.js'
 import './tickets.css'
 export function TicketsPage() {
   const { guildId } = useParams()
@@ -341,6 +341,7 @@ function TicketContent() {
           {section === 'settings' && <TicketSettingsPage />}
           {section === 'permissions' && (
             <>
+              <TicketRoleSettings />
               <Section title="Permissões e auditoria">
                 <div className="table-wrap">
                   <table>

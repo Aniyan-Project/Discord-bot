@@ -6,6 +6,7 @@ O módulo de tickets tem uma seção própria no dashboard: visão geral, painé
 
 1. Entre no dashboard com uma conta que tenha **Gerenciar servidor**. Selecione o servidor e abra **Tickets → Configurações**.
 2. Escolha uma categoria, os cargos de suporte e, se necessário, os cargos que podem gerir os atendimentos pelo Discord. Você pode sobrescrever categoria e equipe por assunto.
+   Os cargos também podem ser editados em **Tickets → Permissões e auditoria**: busque pelo nome, marque os cargos desejados e clique em **Salvar cargos**. Cada caixa aceita vários cargos; desmarque para remover e salve novamente.
 3. Se usar registros, escolha um **canal privado da equipe**. `@everyone` e cargos que não são de suporte/gestão não podem enxergá-lo, exceto permissões administrativas inerentes. Registros não contêm respostas, notas internas ou transcrições.
 4. Crie um painel, personalize clássico/Components V2, configure até cinco assuntos e até cinco perguntas por assunto. Perguntas podem ser curtas ou longas, obrigatórias ou opcionais e ter limite de caracteres.
 5. Salve o rascunho. Revise canal e formato antes de publicar. Testar um painel publicado cria um atendimento real; o dashboard pede a confirmação e as respostas. Em `DEMO_MODE`, todos os efeitos do Discord são simulados.

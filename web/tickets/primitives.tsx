@@ -2,6 +2,7 @@ import {
   useId,
   useRef,
   useEffect,
+  useState,
   type ReactNode,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
@@ -93,22 +94,40 @@ export function Roles({
   value: string[]
   onChange: (ids: string[]) => void
 }) {
-  const { data, tr } = useTickets()
+  const { data, tr, busy } = useTickets()
+  const [search, setSearch] = useState('')
+  const visible = data.resources.roles.filter((r) =>
+    r.name.toLocaleLowerCase().includes(search.toLocaleLowerCase().trim()),
+  )
   return (
-    <Field label={tr(label)}>
-      <select
-        multiple
-        aria-label={tr(label)}
-        value={value}
-        onChange={(e) => onChange([...e.target.selectedOptions].map((o) => o.value))}
-      >
-        {data.resources.roles.map((r) => (
-          <option value={r.id} key={r.id}>
-            {r.name}
-          </option>
+    <fieldset className="role-picker" disabled={busy}>
+      <legend>{tr(label)}</legend>
+      <input
+        type="search"
+        aria-label={tr('Buscar cargos')}
+        placeholder={tr('Buscar cargos')}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+      <div className="role-options">
+        {visible.map((r) => (
+          <label key={r.id}>
+            <input
+              type="checkbox"
+              checked={value.includes(r.id)}
+              onChange={(e) =>
+                onChange(e.target.checked ? [...value, r.id] : value.filter((id) => id !== r.id))
+              }
+            />
+            <span>{r.name}</span>
+          </label>
         ))}
-      </select>
-    </Field>
+        {!visible.length && <p>{tr('Nenhum cargo encontrado.')}</p>}
+      </div>
+      <small>
+        {tr('Selecionados')}: {value.length}
+      </small>
+    </fieldset>
   )
 }
 export function Toggle({

@@ -4,6 +4,43 @@ import { Save } from 'lucide-react'
 import type { TicketSettings } from '../../shared/tickets.js'
 import { useTickets } from './context.js'
 import { Btn, Input, Field, Select, Roles, Toggle, Section } from './primitives.js'
+export function TicketRoleSettings() {
+  const { data, tr, run, mutate, reload } = useTickets()
+  const [settings, setSettings] = useState(data.settings)
+  const [revision, setRevision] = useState(data.revision)
+  const [saved, setSaved] = useState(JSON.stringify(data.settings))
+  useTicketUnsaved(JSON.stringify(settings) !== saved, tr('Sair sem salvar?'))
+  async function save() {
+    const result = await run(() =>
+      mutate<{ settings: TicketSettings; revision: number }>('/settings', 'PUT', { settings, revision }),
+    )
+    if (result) {
+      setSettings(result.settings)
+      setRevision(result.revision)
+      setSaved(JSON.stringify(result.settings))
+      reload()
+    }
+  }
+  return (
+    <Section title="Distribuição e equipe">
+      <div className="fields-two">
+        <Roles
+          label="Cargos de suporte padrão"
+          value={settings.supportRoleIds}
+          onChange={(supportRoleIds) => setSettings((s) => ({ ...s, supportRoleIds }))}
+        />
+        <Roles
+          label="Cargos de gestão"
+          value={settings.managerRoleIds}
+          onChange={(managerRoleIds) => setSettings((s) => ({ ...s, managerRoleIds }))}
+        />
+      </div>
+      <Btn primary icon={Save} onClick={() => void save()}>
+        {tr('Salvar cargos')}
+      </Btn>
+    </Section>
+  )
+}
 export function TicketSettingsPage() {
   const { data, tr, run, mutate, reload } = useTickets(),
     [settings, setSettings] = useState(data.settings),

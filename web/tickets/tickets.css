@@ -1103,6 +1103,7 @@
   margin-top: 30px;
 }
 .tickets-page .table-wrap {
+  position: relative;
   overflow-x: auto;
   max-width: 100%;
   overscroll-behavior: contain;
@@ -1939,8 +1940,59 @@
   border-radius: 8px;
   font-size: 12px;
 }
-.tickets-page .field select[multiple] {
-  min-height: 95px;
+.tickets-page .role-picker {
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.tickets-page .role-picker legend {
+  padding: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #e0e4d5;
+}
+.tickets-page .role-picker input[type='search'] {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 11px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: inherit;
+}
+.tickets-page .role-options {
+  max-height: 180px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-block: 8px;
+}
+.tickets-page .role-options label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 8px;
+  cursor: pointer;
+}
+.tickets-page .role-options label:hover {
+  background: var(--raised);
+}
+.tickets-page .role-options label span {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.tickets-page .role-options input[type='checkbox'] {
+  width: 17px;
+  height: 17px;
+  min-height: 0;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+.tickets-page .role-picker small {
+  color: var(--muted);
 }
 .tickets-page .answer {
   margin-top: 16px;
