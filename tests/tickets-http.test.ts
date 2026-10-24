@@ -2,6 +2,8 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createApp } from '../server/app.js'
 import { loadConfig } from '../server/config.js'
+import { newTicketPanel, defaultTicketSettings } from '../shared/tickets.js'
+import { randomUUID } from 'node:crypto'
 const guild = '1100000000000000001'
 test('ticket HTTP routes require a session, CSRF token and valid bounded input', async () => {
   const production = await createApp(
@@ -19,6 +21,16 @@ test('ticket HTTP routes require a session, CSRF token and valid bounded input',
   try {
     const r = await production.app.inject({ url: `/api/guilds/${guild}/tickets/context` })
     assert.equal(r.statusCode, 401)
+    for (const format of ['view', 'html']) {
+      assert.equal(
+        (
+          await production.app.inject({
+            url: `/api/guilds/${guild}/tickets/00000000-0000-4000-8000-000000000000/transcript/${format}`,
+          })
+        ).statusCode,
+        401,
+      )
+    }
   } finally {
     await production.app.close()
   }
@@ -66,5 +78,58 @@ test('ticket HTTP routes require a session, CSRF token and valid bounded input',
     assert.equal(context.panels.length, 0)
   } finally {
     await demo.app.close()
+  }
+})
+
+test('HTML viewer and download use fresh authorization, nonce CSP and retention without leaking internal notes', async () => {
+  const runtime = await createApp(
+    loadConfig({
+      NODE_ENV: 'test',
+      DEMO_MODE: 'true',
+      DATABASE_PATH: ':memory:',
+      ENCRYPTION_KEY: '55'.repeat(32),
+      APP_URL: 'http://localhost:5173',
+    }),
+  )
+  try {
+    const service = runtime.bot.tickets,
+      user = '1000000000000000001'
+    await service.saveSettings(
+      guild,
+      user,
+      {
+        ...defaultTicketSettings,
+        categoryId: '1300000000000000001',
+        supportRoleIds: ['1400000000000000001'],
+      },
+      0,
+    )
+    const panel = newTicketPanel()
+    panel.channelId = '1200000000000000001'
+    const view = await service.savePanel(guild, user, panel, 0)
+    await service.publish(guild, user, panel.id, randomUUID(), view.revision)
+    const opened = await service.open(guild, user, panel.id, panel.topics[0]!.id, {
+      [panel.topics[0]!.questions[0]!.id]: 'Example',
+    })
+    const closed = await service.action(guild, user, opened.id, 'close', 'Resolved')
+    const saved = service.repo.save({
+      ...closed,
+      notes: [{ actor: user, at: Date.now(), text: 'SECRET NOTE NEVER EXPORTED' }],
+    })
+    const base = `/api/guilds/${guild}/tickets/${opened.id}/transcript`
+    const page = await runtime.app.inject({ url: base + '/view' })
+    assert.equal(page.statusCode, 200)
+    assert.match(String(page.headers['content-type']), /text\/html/)
+    assert.match(String(page.headers['content-security-policy']), /script-src 'nonce-/)
+    assert.match(String(page.headers['content-security-policy']), /font-src data:/)
+    assert.equal(page.headers['cache-control'], 'no-store')
+    assert.ok(!page.body.includes('SECRET NOTE NEVER EXPORTED'))
+    const file = await runtime.app.inject({ url: base + '/html' })
+    assert.equal(file.statusCode, 200)
+    assert.match(String(file.headers['content-disposition']), /attachment; filename="ticket-.*\.html"/)
+    service.repo.save({ ...saved, closedAt: Date.now() - 31 * 86400000 })
+    assert.equal((await runtime.app.inject({ url: base + '/view' })).statusCode, 410)
+  } finally {
+    await runtime.app.close()
   }
 })

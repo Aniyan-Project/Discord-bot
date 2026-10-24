@@ -124,6 +124,13 @@ export interface TicketRecord {
   staffId: string | null
   channelId: string | null
   staffThreadId: string | null
+  channelName?: string
+  guildName?: string
+  staffName?: string | null
+  closedBy?: string
+  closedByName?: string
+  channelMissing?: boolean
+  controlMessages?: Array<{ channelId: string; messageId: string; kind: 'welcome' | 'log' }>
   createdAt: number
   lastActivity: number
   closedAt: number | null
@@ -141,10 +148,41 @@ export interface Transcript {
     at: number
     content: string
     attachments: string[]
+    avatar?: string
+    bot?: boolean
+    editedAt?: number | null
+    files?: Array<{ url: string; name: string; size: number }>
+    embeds?: Array<{
+      title?: string
+      description?: string
+      color?: number
+      fields?: Array<{ name: string; value: string; inline?: boolean }>
+      footer?: string
+    }>
   }>
   truncated: boolean
   contentAvailable: boolean
   capturedAt: number
+}
+export interface TranscriptDocument {
+  ticket: Pick<
+    TicketRecord,
+    | 'id'
+    | 'number'
+    | 'guildId'
+    | 'channelName'
+    | 'guildName'
+    | 'authorName'
+    | 'staffId'
+    | 'staffName'
+    | 'createdAt'
+    | 'closedAt'
+    | 'closedByName'
+    | 'reason'
+    | 'status'
+  > & { subject: string }
+  transcript: Transcript
+  locale: string
 }
 export interface TicketResources {
   channels: Array<{ id: string; name: string }>

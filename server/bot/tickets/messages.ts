@@ -85,15 +85,83 @@ export function ticketControls(t: TicketRecord) {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(`ticket:claim:${t.id}`)
-      .setLabel(tr('Assumir ticket'))
+      .setLabel(tr(t.staffId ? 'Ticket assumido' : 'Assumir ticket'))
+      .setDisabled(!!t.staffId || !['open', 'progress'].includes(t.status))
       .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
       .setCustomId(`ticket:close:${t.id}`)
       .setLabel(tr('Encerrar ticket'))
+      .setDisabled(!['open', 'progress'].includes(t.status))
       .setStyle(ButtonStyle.Secondary),
     new ButtonBuilder()
       .setCustomId(`ticket:transcript:${t.id}`)
       .setLabel(tr('Transcrição'))
       .setStyle(ButtonStyle.Secondary),
   )
+}
+export function ticketLogPayload(
+  t: TicketRecord,
+  action: string,
+): Pick<MessageCreateOptions, 'embeds' | 'components' | 'allowedMentions'> {
+  const tr = (s: string) => tt(t.settings.locale, s),
+    closed = t.status === 'closed'
+  const date = (at: number) => `<t:${Math.floor(at / 1000)}:f>`
+  const embed = new EmbedBuilder()
+    .setColor(closed ? 0xa8cfa3 : 0xff9955)
+    .setAuthor({ name: 'Branilist · ' + tr('Central de suporte') })
+    .setTitle(`Ticket #${t.number} · ${action}`)
+    .setDescription(
+      tr(
+        closed
+          ? 'Atendimento finalizado. O registro está disponível para consulta.'
+          : t.staffId
+            ? 'Atendimento em andamento.'
+            : 'Um atendimento está aguardando a equipe.',
+      ),
+    )
+    .addFields(
+      { name: tr('Aberto por'), value: `<@${t.authorId}>`, inline: true },
+      { name: tr('Assunto'), value: escapeMarkdown(t.topic.name), inline: true },
+      {
+        name: tr('Canal de origem'),
+        value: escapeMarkdown(t.channelName || `ticket-${t.number}`),
+        inline: true,
+      },
+      {
+        name: tr('Responsável'),
+        value: t.staffId ? `<@${t.staffId}>` : tr('Aguardando atendimento'),
+        inline: true,
+      },
+      { name: tr('Aberto em'), value: date(t.createdAt), inline: true },
+    )
+  if (closed) {
+    embed.addFields(
+      {
+        name: tr('Encerrado por'),
+        value: t.closedBy && /^\d{17,20}$/.test(t.closedBy) ? `<@${t.closedBy}>` : tr('Sistema'),
+        inline: true,
+      },
+      { name: tr('Encerrado em'), value: date(t.closedAt || Date.now()), inline: true },
+      {
+        name: tr('Duração'),
+        value: `${Math.max(0, Math.floor(((t.closedAt || Date.now()) - t.createdAt) / 60000))} min`,
+        inline: true,
+      },
+      { name: tr('Motivo do encerramento'), value: escapeMarkdown(t.reason || '—').slice(0, 1024) },
+    )
+    if (t.staffThreadId)
+      embed.addFields({ name: tr('Equipe interna'), value: tr('Tópico trancado e arquivado') })
+  }
+  embed.setFooter({ text: `Branilist Bot · Ticket #${t.number}` }).setTimestamp(t.closedAt || t.createdAt)
+  const components = closed
+    ? [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
+            .setCustomId(`ticket:transcript:${t.id}`)
+            .setLabel(tr('Ver transcrição'))
+            .setStyle(ButtonStyle.Secondary),
+        ),
+      ]
+    : [ticketControls(t)]
+  return { embeds: [embed], components, allowedMentions: { parse: [] } }
 }

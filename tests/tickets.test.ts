@@ -13,7 +13,7 @@ import {
   type TicketRecord,
   type TicketPanel,
 } from '../shared/tickets.js'
-import { panelPayload } from '../server/bot/tickets/messages.js'
+import { panelPayload, ticketControls, ticketLogPayload } from '../server/bot/tickets/messages.js'
 const guild = '1100000000000000001',
   manager = '1000000000000000001',
   author = '1000000000000000002',
@@ -277,6 +277,138 @@ test('Discord channel overwrites deny public access and block thread writes on c
       other,
     )
     assert.deepEqual(removed, [other])
+  } finally {
+    f.close()
+  }
+})
+
+test('repeated and concurrent claims are idempotent even with stale revisions and revoked roles remain forbidden', async () => {
+  const f = await ticketFixture()
+  try {
+    const t = await f.service.open(guild, author, f.panel.id, f.panel.topics[0]!.id, f.answers)
+    let notices = 0
+    f.discord.notice = async () => {
+      notices++
+    }
+    const before = f.discord.accessCalls.length
+    const results = await Promise.all(
+      Array.from({ length: 8 }, () => f.service.action(guild, support, t.id, 'claim', '', t.revision)),
+    )
+    assert.ok(results.every((value) => value.revision === results[0]!.revision))
+    assert.equal(notices, 1)
+    assert.equal(f.discord.accessCalls.length - before, 1)
+    assert.equal(f.service.repo.audits(guild).filter((a) => a.action === 'ticket.claim').length, 1)
+    assert.equal(ticketControls(results[0]!).toJSON().components[0]!.disabled, true)
+    f.discord.people.set(support, { id: support, name: 'Revoked', roles: [], manage: false })
+    await assert.rejects(f.service.action(guild, support, t.id, 'claim'), { code: 'forbidden' })
+  } finally {
+    f.close()
+  }
+})
+
+test('staff thread locks and archives without an assignee; ticket delete waits for it and interrupted closure can retry', async () => {
+  const f = await ticketFixture()
+  try {
+    const original = await f.service.open(guild, author, f.panel.id, f.panel.topics[0]!.id, f.answers)
+    const t = f.service.repo.save({
+      ...original,
+      staffThreadId: '1700000000000000001',
+      settings: { ...original.settings, closeAction: 'delete' },
+    })
+    const calls: string[] = [],
+      gateway = new TicketDiscord(f.discord.client, false, true)
+    gateway.guild = async () =>
+      ({
+        channels: {
+          fetch: async () => ({
+            isThread: () => true,
+            locked: false,
+            archived: false,
+            setLocked: async (value: boolean) => {
+              assert.equal(value, true)
+              calls.push('lock')
+            },
+            setArchived: async (value: boolean) => {
+              assert.equal(value, true)
+              calls.push('archive')
+            },
+            members: {
+              add: () => {
+                throw Error('Must not add members while closing')
+              },
+            },
+          }),
+        },
+      }) as never
+    await gateway.staffThread({ ...t, staffId: null }, true)
+    assert.deepEqual(calls, ['lock', 'archive'])
+    let fail = true
+    f.discord.staffThread = async () => {
+      if (fail) {
+        fail = false
+        throw Error('temporary Discord failure')
+      }
+      calls.push('staff-closed')
+    }
+    f.discord.remove = async () => {
+      calls.push('ticket-deleted')
+    }
+    await assert.rejects(f.service.action(guild, manager, t.id, 'close', 'Resolved'), {
+      code: 'ticketUncertain',
+    })
+    assert.equal(f.service.repo.get(guild, t.id)!.status, 'closing')
+    const closed = await f.service.action(guild, manager, t.id, 'close', 'Resolved')
+    assert.equal(closed.status, 'closed')
+    assert.deepEqual(calls.slice(-2), ['staff-closed', 'ticket-deleted'])
+    assert.equal(closed.closedBy, manager)
+  } finally {
+    f.close()
+  }
+})
+
+test('deleting a ticket channel closes the staff thread without trying to read deleted messages', async () => {
+  const f = await ticketFixture()
+  try {
+    const t = await f.service.open(guild, author, f.panel.id, f.panel.topics[0]!.id, f.answers)
+    f.service.repo.save({ ...t, staffThreadId: '1700000000000000001' })
+    let closed = false
+    f.discord.staffThread = async (_t, close) => {
+      closed = close
+    }
+    f.discord.transcript = async () => {
+      throw Error('Deleted channel must not be read')
+    }
+    await f.service.channelDeleted(guild, t.channelId!)
+    assert.equal(closed, true)
+    assert.equal(f.service.repo.get(guild, t.id)!.status, 'closed')
+    assert.equal(f.service.repo.get(guild, t.id)!.settings.allowReopen, false)
+  } finally {
+    f.close()
+  }
+})
+
+test('ticket logs are embeds, preserve original channel names and never ping users', async () => {
+  const f = await ticketFixture()
+  try {
+    const t = await f.service.open(guild, author, f.panel.id, f.panel.topics[0]!.id, f.answers)
+    const payload = ticketLogPayload(
+      {
+        ...t,
+        channelName: 'parcerias-0002',
+        closedBy: manager,
+        closedByName: 'Manager',
+        status: 'closed',
+        reason: 'Resolved',
+        closedAt: Date.now(),
+      },
+      'Fechado',
+    )
+    const embed = JSON.parse(JSON.stringify(payload.embeds![0]))
+    assert.ok(embed.fields.some((field: { value: string }) => field.value === 'parcerias-0002'))
+    assert.ok(embed.fields.some((field: { value: string }) => field.value === 'Resolved'))
+    assert.deepEqual(payload.allowedMentions, { parse: [] })
+    assert.equal(payload.components!.length, 1)
+    assert.equal(ticketControls({ ...t, status: 'closed' }).toJSON().components[0]!.disabled, true)
   } finally {
     f.close()
   }

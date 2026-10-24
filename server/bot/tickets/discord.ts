@@ -21,8 +21,9 @@ import type {
 import { ticketVariables } from '../../../shared/tickets.js'
 import { tt } from '../../../shared/ticket-i18n.js'
 import { displayAnswer } from '../../../shared/ticket-forms.js'
+import { documentFor, renderTranscript } from '../../tickets/transcript.js'
 import { AppError } from '../../security.js'
-import { panelPayload, ticketControls } from './messages.js'
+import { panelPayload, ticketControls, ticketLogPayload } from './messages.js'
 export interface TicketActor {
   id: string
   name: string
@@ -34,6 +35,7 @@ export class TicketDiscord {
     readonly client: Client,
     readonly demo: boolean,
     readonly contentEnabled: boolean,
+    readonly appUrl = '',
   ) {}
   async guild(id: string) {
     const g = this.client.guilds.cache.get(id)
@@ -209,7 +211,9 @@ export class TicketDiscord {
       rows.push({ id: t.staffId, allow: access, deny })
     return rows
   }
-  async create(t: TicketRecord): Promise<{ channelId: string; staffThreadId: string | null }> {
+  async create(
+    t: TicketRecord,
+  ): Promise<{ channelId: string; staffThreadId: string | null; channelName?: string; guildName?: string }> {
     if (this.demo)
       return { channelId: Math.floor(1e17 + Math.random() * 1e17).toFixed(), staffThreadId: null }
     const g = await this.guild(t.guildId),
@@ -257,7 +261,7 @@ export class TicketDiscord {
         reason: `Branilist ticket ${t.id}`,
       })
     }
-    return { channelId: c.id, staffThreadId: null }
+    return { channelId: c.id, staffThreadId: null, channelName: c.name, guildName: g.name }
   }
   async channel(t: TicketRecord): Promise<TextChannel | ThreadChannel> {
     if (!t.channelId) throw new AppError(409, 'ticketUncertain')
@@ -281,7 +285,7 @@ export class TicketDiscord {
     })
     const roles = t.topic.supportRoleIds.length ? t.topic.supportRoleIds : t.settings.supportRoleIds
     const ping = t.topic.pingSupport || t.settings.pingSupport
-    await c.send({
+    const welcomeMessage = await c.send({
       content:
         `**#${t.number} • ${escapeMarkdown(t.topic.name)}**\n${welcome}${ping ? '\n' + roles.map((r) => `<@&${r}>`).join(' ') : ''}`.slice(
           0,
@@ -290,6 +294,7 @@ export class TicketDiscord {
       components: [ticketControls(t)],
       allowedMentions: { parse: [], roles: ping ? roles : [] },
     })
+    ;(t.controlMessages ??= []).push({ channelId: c.id, messageId: welcomeMessage.id, kind: 'welcome' })
     for (const q of t.topic.questions) {
       const raw = t.answers[q.id]
       const answer =
@@ -346,11 +351,42 @@ export class TicketDiscord {
         'Ticket access updated',
       )
     }
-    if (t.staffThreadId && t.staffId) {
-      const thread = await (await this.guild(t.guildId)).channels.fetch(t.staffThreadId).catch(() => null)
-      if (thread?.isThread()) await thread.members.add(t.staffId)
-      if (thread?.isThread() && t.settings.privateOnClaim && previousStaffId && previousStaffId !== t.staffId)
+    if (!closed) await this.staffThread(t, false, previousStaffId)
+  }
+  async staffThread(t: TicketRecord, closed: boolean, previousStaffId?: string | null) {
+    if (this.demo || !t.staffThreadId) return
+    const thread = await (await this.guild(t.guildId)).channels.fetch(t.staffThreadId).catch((e: unknown) => {
+      if (e && typeof e === 'object' && 'code' in e && e.code === 10003) return null
+      throw e
+    })
+    if (!thread?.isThread()) return
+    if (closed) {
+      if (!thread.locked) await thread.setLocked(true)
+      if (!thread.archived) await thread.setArchived(true)
+    } else {
+      if (thread.archived) await thread.setArchived(false)
+      if (thread.locked) await thread.setLocked(false)
+      if (t.staffId) await thread.members.add(t.staffId)
+      if (t.settings.privateOnClaim && previousStaffId && previousStaffId !== t.staffId)
         await thread.members.remove(previousStaffId)
+    }
+  }
+  async refreshControls(t: TicketRecord) {
+    if (this.demo) return
+    for (const ref of t.controlMessages ?? []) {
+      try {
+        const channel = await (await this.guild(t.guildId)).channels.fetch(ref.channelId)
+        if (channel?.isTextBased() && 'messages' in channel) {
+          const message = await channel.messages.fetch(ref.messageId)
+          await message.edit(
+            ref.kind === 'log' && t.status !== 'closed'
+              ? ticketLogPayload(t, tt(t.settings.locale, 'Aberto'))
+              : { components: [ticketControls(t)] },
+          )
+        }
+      } catch {
+        /* Old/deleted control messages do not block the ticket lifecycle. */
+      }
     }
   }
   async transcript(t: TicketRecord): Promise<Transcript> {
@@ -375,12 +411,25 @@ export class TicketDiscord {
     }
     const c = await this.channel(t)
     let before: string | undefined
+    t.channelName ||= c.name
+    t.guildName ||= c.guild.name
     for (let page = 0; page < 50; page++) {
       const chunk = await c.messages.fetch({ limit: 100, before })
       for (const m of chunk.values())
         value.messages.push({
           id: m.id,
-          author: m.author.username,
+          author: m.member?.displayName || m.author.globalName || m.author.username,
+          avatar: m.author.displayAvatarURL({ size: 64, extension: 'png' }),
+          bot: m.author.bot,
+          editedAt: m.editedTimestamp,
+          files: [...m.attachments.values()].map((a) => ({ url: a.url, name: a.name, size: a.size })),
+          embeds: m.embeds.map((e) => ({
+            title: e.title ?? undefined,
+            description: e.description ?? undefined,
+            color: e.color ?? undefined,
+            fields: e.fields,
+            footer: e.footer?.text,
+          })),
           authorId: m.author.id,
           at: m.createdTimestamp,
           content: m.content,
@@ -401,12 +450,11 @@ export class TicketDiscord {
     const g = await this.guild(t.guildId),
       c = await g.channels.fetch(t.settings.logChannelId)
     if (c?.type !== ChannelType.GuildText || c.permissionsFor(g.roles.everyone)?.has(P.ViewChannel)) return
-    await c.send({
-      content: `**Ticket #${t.number}** • ${escapeMarkdown(action)}\n<@${t.authorId}> • ${escapeMarkdown(t.topic.name)}${t.channelId ? '\n<#' + t.channelId + '>' : ''}`,
-      components: t.status === 'open' ? [ticketControls(t)] : [],
-      allowedMentions: { parse: [] },
-    })
+    const message = await c.send(ticketLogPayload(t, action))
+    if (t.status === 'open')
+      (t.controlMessages ??= []).push({ channelId: c.id, messageId: message.id, kind: 'log' })
   }
+
   async notice(t: TicketRecord, text: string, ping = false) {
     if (this.demo) return
     await (
@@ -433,8 +481,8 @@ export class TicketDiscord {
     await user.send({
       content: `${tt(t.settings.locale, 'Transcrição')} #${t.number}`,
       files: [
-        new AttachmentBuilder(Buffer.from(JSON.stringify(transcript, null, 2)), {
-          name: `ticket-${t.number}.json`,
+        new AttachmentBuilder(Buffer.from(renderTranscript(documentFor(t, transcript)).html), {
+          name: `ticket-${t.number}.html`,
         }),
       ],
       allowedMentions: { parse: [] },

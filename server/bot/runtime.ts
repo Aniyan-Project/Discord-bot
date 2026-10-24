@@ -30,7 +30,7 @@ export class BotRuntime {
     this.engine = new CommandEngine(config, store, api)
     this.tickets = new TicketService(
       store,
-      new TicketDiscord(this.client, config.DEMO_MODE, config.ENABLE_MESSAGE_CONTENT),
+      new TicketDiscord(this.client, config.DEMO_MODE, config.ENABLE_MESSAGE_CONTENT, config.APP_URL),
       config.ENCRYPTION_KEY,
     )
     this.unregisterEvents = registerBotEvents({

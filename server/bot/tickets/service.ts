@@ -10,6 +10,7 @@ import {
 } from '../../../shared/tickets.js'
 import { tt } from '../../../shared/ticket-i18n.js'
 import { validAnswer } from '../../../shared/ticket-forms.js'
+import { documentFor } from '../../tickets/transcript.js'
 import { TicketDiscord, type TicketActor } from './discord.js'
 export class TicketService {
   readonly repo: TicketRepository
@@ -186,6 +187,8 @@ export class TicketService {
         t = this.repo.save({ ...t, status: 'open' })
         this.repo.audit(guild, user, 'ticket.opened', t.id)
         await this.safeLog(t, 'Aberto')
+        t = this.repo.save(t)
+        await this.discord.refreshControls(t)
         return t
       } catch (e) {
         this.repo.save({ ...t, status: 'error' })
@@ -222,6 +225,7 @@ export class TicketService {
     return this.store.withGuildLock(guild, async () => {
       let t = this.record(guild, id)
       const { manager } = await this.staff(t, user)
+      if (action === 'claim' && t.staffId === user && t.status === 'progress') return t
       if (revision !== undefined && t.revision !== revision) throw new AppError(409, 'revisionConflict')
       if (action === 'recover') {
         if (!manager || !['creating', 'error'].includes(t.status) || Date.now() - t.createdAt < 120000)
@@ -255,9 +259,12 @@ export class TicketService {
         }
         if (t.staffId && t.staffId !== user && action === 'claim' && !manager)
           throw new AppError(403, 'forbidden')
-        const next = { ...t, staffId, status: 'progress' as const }
+        if (t.staffId === staffId) return t
+        const assignee = await this.discord.actor(guild, staffId)
+        const next = { ...t, staffId, staffName: assignee.name, status: 'progress' as const }
         await this.discord.access(next, false, t.staffId)
         t = this.repo.save(next)
+        await this.discord.refreshControls(t)
         if (t.settings.pingOnClaim)
           await this.discord
             .notice(t, tt(t.settings.locale, 'Responsável') + ': {{staff}}', true)
@@ -281,6 +288,7 @@ export class TicketService {
         this.repo.clearTranscript(t.id)
         t = this.repo.save({ ...t, status: 'open', closedAt: null, reason: '', lastActivity: Date.now() })
         await this.discord.notice(t, tt(t.settings.locale, 'Reabrir ticket')).catch(() => {})
+        await this.discord.refreshControls(t)
       }
       this.repo.audit(guild, user, 'ticket.' + action, id)
       return t
@@ -292,15 +300,30 @@ export class TicketService {
     if ((t.settings.requireCloseReason && !reason.trim()) || reason.length > 1000)
       throw new AppError(400, 'invalidInput')
     let snapshot = t.status === 'closing' ? this.repo.readTranscript(t.guildId, t.id) : null
-    if (!snapshot) snapshot = await this.discord.transcript(t)
+    if (!snapshot)
+      snapshot = t.channelMissing
+        ? { messages: [], truncated: false, contentAvailable: false, capturedAt: Date.now() }
+        : await this.discord.transcript(t)
     if (t.settings.retentionDays > 0) this.repo.transcript(t, snapshot)
-    if (t.status !== 'closing') t = this.repo.save({ ...t, status: 'closing', reason })
+    if (t.status !== 'closing') {
+      const closer = user === 'system' ? null : await this.discord.actor(t.guildId, user)
+      t = this.repo.save({
+        ...t,
+        status: 'closing',
+        reason,
+        closedBy: user,
+        closedByName: closer?.name || tt(t.settings.locale, 'Sistema'),
+      })
+    }
     try {
+      await this.discord.staffThread(t, true)
       await this.discord
         .notice(t, t.settings.closedMessage || tt(t.settings.locale, 'Encerrar ticket'))
         .catch(() => {})
-      if (t.settings.closeAction === 'delete') await this.discord.remove(t)
-      else await this.discord.access(t, true)
+      if (!t.channelMissing) {
+        if (t.settings.closeAction === 'delete') await this.discord.remove(t)
+        else await this.discord.access(t, true)
+      }
     } catch (e) {
       if (!(e instanceof AppError && e.status === 404 && t.settings.closeAction === 'delete')) {
         this.repo.audit(t.guildId, user, 'ticket.close_uncertain', t.id)
@@ -308,6 +331,7 @@ export class TicketService {
       }
     }
     t = this.repo.save({ ...t, status: 'closed', reason, closedAt: Date.now() })
+    await this.discord.refreshControls(t)
     this.repo.audit(t.guildId, user, 'ticket.closed', t.id)
     if (t.settings.dmTranscript)
       await this.discord
@@ -326,6 +350,11 @@ export class TicketService {
     if (stored) return stored
     if (t.status === 'open' || t.status === 'progress') return this.discord.transcript(t)
     throw new AppError(410, 'ticketTranscriptExpired')
+  }
+  async transcriptDocument(guild: string, user: string, id: string) {
+    const transcript = await this.transcript(guild, user, id)
+    const t = this.record(guild, id)
+    return documentFor(t, transcript)
   }
   async requestClose(guild: string, user: string, id: string) {
     const t = this.record(guild, id)
@@ -389,13 +418,18 @@ export class TicketService {
     await this.store.withGuildLock(guild, async () => {
       const t = this.repo.byChannel(guild, channel)
       if (t && t.status !== 'closed') {
-        this.repo.save({
+        const pending = this.repo.save({
           ...t,
-          status: 'closed',
-          closedAt: Date.now(),
+          status: 'closing',
+          channelMissing: true,
+          closedBy: 'system',
+          closedByName: tt(t.settings.locale, 'Sistema'),
           reason: 'Channel deleted in Discord',
           settings: { ...t.settings, allowReopen: false },
         })
+        await this.closeRecord(pending, 'system', pending.reason).catch(() =>
+          this.repo.audit(guild, 'system', 'ticket.close_uncertain', t.id),
+        )
         this.repo.audit(guild, 'system', 'ticket.channel_deleted', t.id)
       }
     })

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { ticketId, discordId } from '../../shared/tickets.js'
 import type { TicketService } from '../bot/tickets/service.js'
 import type { Session } from '../store.js'
+import { renderTranscript } from './transcript.js'
 export function registerTicketRoutes(
   app: FastifyInstance,
   service: TicketService,
@@ -83,6 +84,16 @@ export function registerTicketRoutes(
       .header('content-disposition', `attachment; filename="ticket-${id}.json"`)
       .send(await service.transcript(guild, user, id))
   })
+  for (const format of ['view', 'html'] as const) {
+    app.get(`/api/guilds/:id/tickets/:ticketId/transcript/${format}`, async (r, reply) => {
+      const { guild, user } = scope(r),
+        id = params(r)
+      const rendered = renderTranscript(await service.transcriptDocument(guild, user, id))
+      reply.header('content-security-policy', rendered.csp)
+      if (format === 'html') reply.header('content-disposition', `attachment; filename="ticket-${id}.html"`)
+      return reply.type('text/html; charset=utf-8').send(rendered.html)
+    })
+  }
   app.post(
     '/api/guilds/:id/tickets/:ticketId/actions',
     { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },

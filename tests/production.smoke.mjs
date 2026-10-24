@@ -36,6 +36,14 @@ test('production build serves the compiled SPA, assets and secure cookies withou
       401,
     )
     assert.match(String(page.headers['content-security-policy']), /frame-ancestors 'none'/)
+    assert.equal(
+      (
+        await app.inject({
+          url: '/api/guilds/1100000000000000001/tickets/00000000-0000-4000-8000-000000000000/transcript/view',
+        })
+      ).statusCode,
+      401,
+    )
     assert.ok(!page.body.includes('test-only'))
   } finally {
     await app.close()

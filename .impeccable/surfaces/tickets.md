@@ -27,6 +27,8 @@ Form controls retain this visual system: a field-type picker adds short/long tex
 
 ## Completion
 
+Approved ticket-records refinement: private Discord logs use structured native embeds; claimed/closed controls expose their state and repeated claims are idempotent. The authenticated transcript and downloadable HTML inherit the approved warm graphite reader, message chronology, responsive details column, labeled search and HTML/JSON export. Source is in `server/tickets/transcript.ts` and `shared/transcript-style.ts`; desktop/mobile evidence and generated log payloads are in `.impeccable/review/ticket-records/`. A fresh finish reviewer returned ship with no material findings. This introduces no global token changes or new raster assets.
+
 The integrated surface passed a fresh finish review with a ship verdict and no material visual fixes. Documentation checked `web/tickets/tickets.css`, representative page/editor/preview/dialog components, shared shell navigation and responsive styles, shared ticket contracts and backend persistence/routes against the incumbent system. `DESIGN.md` and `.impeccable/design.json` remain unchanged because this is an ordinary extension.
 
 Review evidence is in `.impeccable/review/tickets/`: `desktop.png`, `editor.png`, `questions.png`, `history.png`, `detail.png`, `settings.png`, `permissions.png`, `mobile.png`, `mobile-navigation.png`, `mobile-settings.png`, `english.png` and `spanish.png`. These twelve captures are development evidence, not shipping raster assets. No new bundled raster asset was introduced; manager-supplied panel images remain external URLs.

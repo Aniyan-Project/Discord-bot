@@ -379,6 +379,17 @@ function TicketDetail({
             </Btn>
           )}
           <Btn
+            onClick={() =>
+              window.open(
+                `/api/guilds/${guildId}/tickets/${t.id}/transcript/view`,
+                '_blank',
+                'noopener,noreferrer',
+              )
+            }
+          >
+            {tr('Ver transcrição')}
+          </Btn>
+          <Btn
             icon={Download}
             onClick={() =>
               void run(async () => {
