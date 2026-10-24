@@ -5,9 +5,13 @@ import { AppError } from '../security.js'
 import type { Store } from '../store.js'
 import { CommandEngine } from './core/engine.js'
 import { registerBotEvents } from './events/index.js'
+import { TicketService } from './tickets/service.js'
+import { TicketDiscord } from './tickets/discord.js'
 export class BotRuntime {
   readonly client: Client
   readonly engine: CommandEngine
+  readonly tickets: TicketService
+  private maintenance?: ReturnType<typeof setInterval>
   private readonly unregisterEvents: () => void
   constructor(
     readonly config: Config,
@@ -17,20 +21,25 @@ export class BotRuntime {
     this.client = new Client({
       intents: [
         GatewayIntentBits.Guilds,
-        ...(config.ENABLE_MESSAGE_CONTENT
-          ? [GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
-          : []),
+        GatewayIntentBits.GuildMessages,
+        ...(config.ENABLE_MESSAGE_CONTENT ? [GatewayIntentBits.MessageContent] : []),
       ],
       allowedMentions: { parse: [], repliedUser: false },
       failIfNotExists: false,
     })
     this.engine = new CommandEngine(config, store, api)
+    this.tickets = new TicketService(
+      store,
+      new TicketDiscord(this.client, config.DEMO_MODE, config.ENABLE_MESSAGE_CONTENT),
+      config.ENCRYPTION_KEY,
+    )
     this.unregisterEvents = registerBotEvents({
       config,
       store,
       api,
       client: this.client,
       engine: this.engine,
+      tickets: this.tickets,
     })
   }
   installed(guildId: string): boolean {
@@ -79,8 +88,22 @@ export class BotRuntime {
   }
   async start(): Promise<void> {
     if (!this.config.DEMO_MODE) await this.client.login(this.config.DISCORD_TOKEN)
+    let running = false
+    this.maintenance = setInterval(() => {
+      if (!running) {
+        running = true
+        void this.tickets
+          .maintenance()
+          .catch(() => {})
+          .finally(() => {
+            running = false
+          })
+      }
+    }, 60000)
+    this.maintenance.unref()
   }
   async close(): Promise<void> {
+    if (this.maintenance) clearInterval(this.maintenance)
     try {
       await this.client.destroy()
     } finally {

@@ -3032,3 +3032,89 @@ dialog::backdrop {
     scroll-behavior: auto !important;
   }
 }
+
+/* The navigation owns its scroll; server identity and account stay in view. */
+.sidebar {
+  height: 100vh;
+  height: 100dvh;
+}
+.sidebar-brand,
+.guild-picker,
+.sidebar-bottom {
+  flex-shrink: 0;
+}
+.sidebar-nav {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #626953 #181916;
+  padding-bottom: 12px;
+}
+.sidebar-nav > a,
+.sidebar-nav > .nav-group {
+  flex-shrink: 0;
+}
+.sidebar-bottom {
+  margin-top: 0;
+  padding-top: 12px;
+}
+.mobile-nav {
+  overscroll-behavior: contain;
+}
+.mobile-nav::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+@media (max-height: 800px) {
+  .sidebar .sidebar-brand {
+    padding: 18px 23px;
+  }
+  .sidebar .guild-picker {
+    margin-bottom: 13px;
+  }
+  .sidebar-bottom {
+    padding-top: 9px;
+  }
+  .sidebar-user {
+    padding-block: 13px;
+  }
+  .sidebar-nav .nav-group:not(:first-child) {
+    margin-top: 18px;
+  }
+}
+@media (max-width: 1000px) {
+  .mobile-nav .sidebar-brand {
+    padding-block: 24px;
+  }
+  .mobile-nav .guild-picker {
+    margin-bottom: 13px;
+  }
+  .mobile-nav .sidebar-bottom {
+    padding-top: 9px;
+  }
+  .mobile-nav .sidebar-user {
+    padding-block: 13px;
+  }
+  .mobile-nav .sidebar-nav {
+    min-height: 0;
+    flex: 1;
+  }
+}
+.sidebar-scroll-guide {
+  display: none;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  color: #b2baa3;
+  padding: 6px 10px;
+}
+@media (max-height: 850px) {
+  .sidebar-scroll-guide {
+    display: flex;
+  }
+}

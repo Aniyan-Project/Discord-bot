@@ -16,6 +16,7 @@ import { AppError, constantEqual, hashToken, requireOrigin } from './security.js
 import { guildSettingsSchema, type GuildSummary, type SessionView } from '../shared/domain.js'
 import { parseStudioDraft } from '../shared/message-studio.js'
 import { MessageStudio } from './bot/services/message-studio.js'
+import { registerTicketRoutes } from './tickets/routes.js'
 const snowflake = z.string().regex(/^\d{17,20}$/)
 const mediaId = z.string().regex(/^[1-9]\d{0,19}$/)
 const status = z.enum(['PLANNING', 'CURRENT', 'COMPLETED', 'PAUSED', 'DROPPED'])
@@ -142,6 +143,7 @@ export async function createApp(config: Config, overrides: Partial<Dependencies>
     return reply.code(500).send({ error: 'requestFailed' })
   })
   app.get('/api/health', async () => ({ ok: true, bot: bot.status().online, demo: config.DEMO_MODE }))
+  registerTicketRoutes(app, bot.tickets, session, csrf)
   app.get('/api/session', async (request) => {
     const value = config.DEMO_MODE ? demoSession : store.session(request.cookies[sessionCookie])
     const linked = value ? (store.account(value.user.id)?.profile ?? null) : null

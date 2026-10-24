@@ -5,8 +5,10 @@ import { createConfirmationHandler } from './confirmation.js'
 import { createMediaSearchHandler } from './media-search.js'
 import { createSlashHandler } from './slash.js'
 import type { InteractionHandler } from './types.js'
+import { ticketInteractionHandler } from '../tickets/interactions.js'
 export function createInteractionRouter(context: BotContext) {
   const handlers: readonly InteractionHandler[] = [
+    ...(context.tickets ? [ticketInteractionHandler(context.tickets)] : []),
     createSlashHandler(context),
     createAutocompleteHandler(context),
     createMediaSearchHandler(context),

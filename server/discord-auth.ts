@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { PermissionFlagsBits as P } from 'discord.js'
 import type { Config } from './config.js'
 import type { Store, Session, DiscordTokens } from './store.js'
 import type { GuildSummary, UserInfo } from '../shared/domain.js'
@@ -45,7 +46,17 @@ export class DiscordAuth {
     url.search = new URLSearchParams({
       client_id: this.config.DISCORD_CLIENT_ID,
       scope: 'bot applications.commands',
-      permissions: '67193856',
+      permissions: (
+        P.ViewChannel |
+        P.SendMessages |
+        P.EmbedLinks |
+        P.AttachFiles |
+        P.ReadMessageHistory |
+        P.ManageChannels |
+        P.ManageThreads |
+        P.CreatePrivateThreads |
+        P.SendMessagesInThreads
+      ).toString(),
       ...(guildId ? { guild_id: guildId, disable_guild_select: 'true' } : {}),
     }).toString()
     return url.href

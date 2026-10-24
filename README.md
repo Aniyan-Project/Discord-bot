@@ -1,5 +1,7 @@
 # Branilist Bot
 
+O dashboard inclui um [sistema de tickets](docs/tickets.md) com painéis clássico/Components V2, assuntos e formulários, canais privados ou threads, equipe responsável, notas internas, transcrições, modelos JSON, auditoria e configurações por servidor. As interfaces têm Português, Inglês e Espanhol. Consulte o guia para permissões, retenção e configuração inicial.
+
 Um companheiro do Branilist para comunidades no Discord, com **comandos por prefixo e slash**, site público e dashboard. Integração feita com o pacote publicado [`@aniyan-project/branilist-api`](https://www.npmjs.com/package/@aniyan-project/branilist-api).
 
 Português · English · Español — [English setup](docs/README.en.md) · [Guía en español](docs/README.es.md)

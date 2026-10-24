@@ -43,6 +43,10 @@ import {
   UserRound,
   X,
   Zap,
+  Ticket,
+  PanelsTopLeft,
+  Files,
+  History,
 } from 'lucide-react'
 import '@fontsource-variable/manrope'
 import './styles.css'
@@ -71,6 +75,8 @@ import {
   PageTitle,
 } from './components.js'
 import { SettingsPage } from './settings.js'
+import { tt } from '../shared/ticket-i18n.js'
+const TicketsPage = lazy(() => import('./tickets/index.js').then((m) => ({ default: m.TicketsPage })))
 const MessageStudioPage = lazy(() =>
   import('./message-studio.js').then((module) => ({ default: module.MessageStudioPage })),
 )
@@ -445,6 +451,27 @@ function DashboardLayout() {
             </NavLink>
           </>
         )}
+        {guildId && (
+          <>
+            <span className="nav-group">{tt(locale, 'Tickets')}</span>
+            {[
+              ['overview', 'Visão geral dos tickets', Ticket],
+              ['panels', 'Painéis de abertura', PanelsTopLeft],
+              ['templates', 'Modelos', Files],
+              ['history', 'Histórico de tickets', History],
+              ['settings', 'Configurações de tickets', Settings2],
+              ['permissions', 'Permissões e auditoria', ShieldCheck],
+            ].map(([section, label, Icon]) => {
+              const NavIcon = Icon as typeof Ticket
+              return (
+                <NavLink key={String(section)} to={`${base}/tickets/${section}`}>
+                  <NavIcon size={18} />
+                  {tt(locale, String(label))}
+                </NavLink>
+              )
+            })}
+          </>
+        )}
         <span className="nav-group">Branilist</span>
         <NavLink to="/dashboard/account">
           <UserRound size={18} />
@@ -455,6 +482,10 @@ function DashboardLayout() {
           {tr('commands')}
         </NavLink>
       </nav>
+      <div className="sidebar-scroll-guide">
+        <ChevronDown size={12} />
+        {tt(locale, 'Role o menu para mais opções')}
+      </div>
       <div className="sidebar-bottom">
         <a
           href={session?.supportUrl || 'https://github.com/Aniyan-Project/Discord-bot/issues'}
@@ -774,6 +805,14 @@ const router = createBrowserRouter([
               },
               { path: 'catalog', element: <CatalogPage /> },
               { path: 'activity', element: <ActivityPage /> },
+              {
+                path: 'tickets/:section?',
+                element: (
+                  <Suspense fallback={<Loading />}>
+                    <TicketsPage />
+                  </Suspense>
+                ),
+              },
             ],
           },
         ],

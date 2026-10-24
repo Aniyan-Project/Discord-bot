@@ -22,6 +22,19 @@ test('production build serves the compiled SPA, assets and secure cookies withou
     assert.equal((await app.inject({ url: script })).statusCode, 200)
     assert.equal((await app.inject({ url: '/assets/does-not-exist.js' })).statusCode, 404)
     assert.equal((await app.inject({ url: '/api/private-unknown' })).statusCode, 404)
+    assert.equal((await app.inject({ url: '/dashboard/1100000000000000001/tickets/panels' })).statusCode, 200)
+    assert.equal(
+      (await app.inject({ url: '/api/guilds/1100000000000000001/tickets/context' })).statusCode,
+      401,
+    )
+    assert.equal(
+      (
+        await app.inject({
+          url: '/api/guilds/1100000000000000001/tickets/00000000-0000-4000-8000-000000000000/transcript',
+        })
+      ).statusCode,
+      401,
+    )
     assert.match(String(page.headers['content-security-policy']), /frame-ancestors 'none'/)
     assert.ok(!page.body.includes('test-only'))
   } finally {

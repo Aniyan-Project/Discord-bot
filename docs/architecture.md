@@ -8,7 +8,13 @@ O código Discord está em `server/bot/`: `commands/` reúne um módulo por coma
 
 Os adaptadores Discord convertem mensagens e interações em `Invocation`. O `CommandEngine` compartilha validação, cooldown, canais permitidos, regras por servidor e operações entre prefixo e slash. Respostas pessoais usam DM ou mensagens efêmeras. Componentes de confirmação são associados à pessoa e ao contexto original, consumidos uma única vez e expiram em cinco minutos.
 
-O bot pede apenas Guilds e, quando habilitado, GuildMessages/MessageContent. Não pede Presence ou Guild Members Intent. O convite não inclui Administrator. Autocomplete é limitado e possui prazo curto para não prender a interação.
+O bot pede Guilds e GuildMessages; MessageContent é opcional e necessário para comandos por prefixo e transcrições completas. Não pede Presence ou Guild Members Intent. O convite não inclui Administrator. Autocomplete é limitado e possui prazo curto para não prender a interação.
+
+## Tickets
+
+O módulo fica em `server/bot/tickets/`, com mensagens, adaptador Discord, ciclo de vida e interações separados. `server/tickets/` contém persistência e rotas autenticadas; `web/tickets/` contém as páginas carregadas sob demanda. O [guia de tickets](tickets.md) explica permissões, threads privadas, retenção e recuperação de operações incertas.
+
+As ações de tickets revalidam a associação ao servidor e os cargos usando o bot. Escritas HTTP também exigem a sessão, a origem e o CSRF da aplicação. Respostas, notas e transcrições são criptografadas separadamente dos metadados; exportações não incluem notas internas. A manutenção roda em lotes limitados, e os mesmos locks por servidor serializam aberturas e alterações concorrentes.
 
 ## Autenticação e autorização
 

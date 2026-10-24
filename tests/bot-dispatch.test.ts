@@ -197,7 +197,7 @@ test('unrelated interactions are ignored and runtime shutdown removes only its r
     events = [Events.InteractionCreate, Events.MessageCreate, Events.Error] as const
   const listeners = events.map((event) => [event, bot.client.listeners(event)] as const)
   try {
-    for (const [, list] of listeners) assert.equal(list.length, 1)
+    for (const [event, list] of listeners) assert.equal(list.length, event === Events.MessageCreate ? 2 : 1)
     const interaction = {
       isChatInputCommand: () => false,
       isAutocomplete: () => false,
