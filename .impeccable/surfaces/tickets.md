@@ -23,6 +23,8 @@ FORM: User-approved `branilist-tickets-preview.html`, integrated into the real d
 
 SIGNATURE: Draft edits immediately update the Discord preview. Saving the draft and publishing the Discord message are separate actions; a published panel retains its prior content and form until republished. Publication and real opening tests require an explicit review action. Demo mode is visibly identified and simulates Discord effects.
 
+Form controls retain this visual system: a field-type picker adds short/long text, single/multiple selects, radio groups, checkbox groups and confirmation. Type-specific settings disclose help text, placeholders, options and response limits; fields can be reordered. The modal preview uses semantic native controls and scrolls within the viewport on desktop and mobile. Existing published forms remain stable until republished.
+
 ## Completion
 
 The integrated surface passed a fresh finish review with a ship verdict and no material visual fixes. Documentation checked `web/tickets/tickets.css`, representative page/editor/preview/dialog components, shared shell navigation and responsive styles, shared ticket contracts and backend persistence/routes against the incumbent system. `DESIGN.md` and `.impeccable/design.json` remain unchanged because this is an ordinary extension.

@@ -7,11 +7,32 @@ export const questionSchema = z
   .object({
     id: ticketId,
     label: z.string().trim().min(1).max(45),
-    style: z.enum(['short', 'long']).default('long'),
+    style: z.enum(['short', 'long', 'select', 'multi', 'radio', 'checkboxes', 'checkbox']).default('long'),
     required: z.boolean().default(true),
     maxLength: z.number().int().min(1).max(2000).default(1000),
+    minLength: z.number().int().min(0).max(2000).default(0),
+    description: z.string().max(100).default(''),
+    placeholder: z.string().max(100).default(''),
+    options: z.array(z.string().trim().min(1).max(100)).max(10).default([]),
+    minChoices: z.number().int().min(1).max(10).default(1),
+    maxChoices: z.number().int().min(1).max(10).default(1),
   })
   .strict()
+  .superRefine((q, ctx) => {
+    const invalid = (message: string) => ctx.addIssue({ code: 'custom', message })
+    if (q.style === 'short' || q.style === 'long') {
+      if (q.minLength > q.maxLength) invalid('Minimum length exceeds maximum')
+    } else if (q.style !== 'checkbox') {
+      if (q.options.length < (q.style === 'radio' ? 2 : 1)) invalid('Add choices')
+      if (new Set(q.options).size !== q.options.length) invalid('Duplicate choices')
+      if (
+        (q.style === 'multi' || q.style === 'checkboxes') &&
+        (q.minChoices > q.maxChoices || q.maxChoices > q.options.length)
+      )
+        invalid('Invalid choice limits')
+    }
+  })
+export type TicketQuestion = z.infer<typeof questionSchema>
 export const topicSchema = z
   .object({
     id: ticketId,

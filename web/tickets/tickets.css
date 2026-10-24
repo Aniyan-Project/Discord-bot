@@ -2011,6 +2011,84 @@
   display: grid;
   gap: 12px;
 }
+.tickets-page .question {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.tickets-page .question-actions {
+  display: flex;
+  align-self: end;
+  gap: 4px;
+}
+.tickets-page .form-add-field {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+}
+.tickets-page .form-add-field .field {
+  flex: 1;
+  margin: 0;
+}
+.tickets-page .form-add-field .btn {
+  min-height: 42px;
+}
+.tickets-page .ticket-answer {
+  border: 0;
+  margin: 0 0 20px;
+  padding: 0;
+  min-width: 0;
+}
+.tickets-page .ticket-answer legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.tickets-page .ticket-answer legend small {
+  font-weight: 400;
+  color: var(--muted);
+  margin-inline-start: 8px;
+}
+.tickets-page .ticket-answer .answer-hint {
+  margin-block: 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.tickets-page .ticket-answer select[multiple] {
+  min-height: 110px;
+}
+.tickets-page .ticket-choice-options label,
+.tickets-page .ticket-confirmation {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.tickets-page .ticket-choice-options input,
+.tickets-page .ticket-confirmation input {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
+.tickets-page .ticket-choice-options span {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .tickets-page .question {
+    grid-template-columns: 1fr;
+  }
+  .tickets-page .form-add-field {
+    flex-wrap: wrap;
+  }
+  .tickets-page .form-add-field .field {
+    flex-basis: 100%;
+  }
+}
 .tickets-page .field-control input,
 .tickets-page .field-control textarea,
 .tickets-page .field-control select {

@@ -1,10 +1,19 @@
 import { useState } from 'react'
 import { useTicketUnsaved } from './unsaved.js'
 import { Plus, Trash2, ArrowUp, Save, Download, ArrowLeft, Send } from 'lucide-react'
-import { panelSchema, type TicketPanel, type PanelView } from '../../shared/tickets.js'
+import {
+  panelSchema,
+  questionSchema,
+  type TicketPanel,
+  type PanelView,
+  type TicketQuestion,
+} from '../../shared/tickets.js'
+import { fieldTypes } from '../../shared/ticket-forms.js'
 import { useTickets } from './context.js'
 import { Btn, Field, Input, Select, Roles, Toggle, Modal, download } from './primitives.js'
 import { TicketPreview } from './preview.js'
+import { TicketFormField } from './form-field.js'
+import { QuestionEditor } from './form-editor.js'
 export function TicketEditor({
   initial,
   onExit,
@@ -22,7 +31,9 @@ export function TicketEditor({
     [topicId, setTopicId] = useState(panel.topics[0]!.id),
     [topicTab, setTopicTab] = useState('general'),
     [form, setForm] = useState<import('../../shared/tickets.js').TicketTopic | null>(null),
-    [validation, setValidation] = useState('')
+    [validation, setValidation] = useState(''),
+    [newType, setNewType] = useState<TicketQuestion['style']>('long'),
+    [previewAnswers, setPreviewAnswers] = useState<Record<string, string>>({})
   useTicketUnsaved(dirty, tr('Sair sem salvar?'))
   const topic = panel.topics.find((t) => t.id === topicId) ?? panel.topics[0]!
   function update<K extends keyof TicketPanel>(key: K, value: TicketPanel[K]) {
@@ -278,97 +289,64 @@ export function TicketEditor({
               )}
               {topicTab === 'questions' && (
                 <>
+                  <p className="small">
+                    {tr(
+                      'Até cinco campos por formulário. Salve e republique o painel para atualizar o Discord.',
+                    )}
+                  </p>
                   {topic.questions.map((q, i) => (
-                    <div className="question-block" key={q.id}>
-                      <div className="question">
-                        <Input
-                          label={tr('Pergunta') + ' ' + (i + 1)}
-                          value={q.label}
-                          maxLength={45}
-                          onChange={(e) =>
-                            topicUpdate(
-                              'questions',
-                              topic.questions.map((x) =>
-                                x.id === q.id ? { ...x, label: e.target.value } : x,
-                              ),
-                            )
-                          }
-                        />
-                        <Btn
-                          quiet
-                          danger
-                          icon={Trash2}
-                          aria-label={tr('Excluir') + ' ' + (i + 1)}
-                          onClick={() =>
-                            topicUpdate(
-                              'questions',
-                              topic.questions.filter((x) => x.id !== q.id),
-                            )
-                          }
-                        />
-                      </div>
-                      <div className="fields-two">
-                        <Select
-                          label="Formulário"
-                          empty={false}
-                          value={q.style}
-                          options={[
-                            { id: 'short', name: tr('Texto curto') },
-                            { id: 'long', name: tr('Texto longo') },
-                          ]}
-                          onChange={(v) =>
-                            topicUpdate(
-                              'questions',
-                              topic.questions.map((x) => (x.id === q.id ? { ...x, style: v } : x)),
-                            )
-                          }
-                        />
-                        <Input
-                          label="Limite de caracteres"
-                          type="number"
-                          min={1}
-                          max={2000}
-                          value={q.maxLength}
-                          onChange={(e) =>
-                            topicUpdate(
-                              'questions',
-                              topic.questions.map((x) =>
-                                x.id === q.id ? { ...x, maxLength: Number(e.target.value) } : x,
-                              ),
-                            )
-                          }
-                        />
-                      </div>
-                      <Toggle
-                        label="Obrigatória"
-                        value={q.required}
-                        onChange={(v) =>
-                          topicUpdate(
-                            'questions',
-                            topic.questions.map((x) => (x.id === q.id ? { ...x, required: v } : x)),
-                          )
-                        }
-                      />
-                    </div>
+                    <QuestionEditor
+                      key={q.id}
+                      question={q}
+                      index={i}
+                      count={topic.questions.length}
+                      onChange={(next) =>
+                        topicUpdate(
+                          'questions',
+                          topic.questions.map((x) => (x.id === q.id ? next : x)),
+                        )
+                      }
+                      onRemove={() =>
+                        topicUpdate(
+                          'questions',
+                          topic.questions.filter((x) => x.id !== q.id),
+                        )
+                      }
+                      onMove={(offset) => {
+                        const next = [...topic.questions]
+                        ;[next[i], next[i + offset]] = [next[i + offset]!, next[i]!]
+                        topicUpdate('questions', next)
+                      }}
+                    />
                   ))}
-                  <Btn
-                    icon={Plus}
-                    disabled={topic.questions.length >= 5}
-                    onClick={() =>
-                      topicUpdate('questions', [
-                        ...topic.questions,
-                        {
-                          id: crypto.randomUUID(),
-                          label: tr('Pergunta'),
-                          style: 'long',
-                          required: true,
-                          maxLength: 1000,
-                        },
-                      ])
-                    }
-                  >
-                    {tr('Adicionar pergunta')}
-                  </Btn>
+                  <div className="form-add-field">
+                    <Select
+                      label="Novo campo"
+                      value={newType}
+                      empty={false}
+                      options={Object.entries(fieldTypes).map(([id, name]) => ({ id, name: tr(name) }))}
+                      onChange={(v) => setNewType(v as TicketQuestion['style'])}
+                    />
+                    <Btn
+                      icon={Plus}
+                      disabled={topic.questions.length >= 5}
+                      onClick={() =>
+                        topicUpdate('questions', [
+                          ...topic.questions,
+                          questionSchema.parse({
+                            id: crypto.randomUUID(),
+                            label: tr('Campo'),
+                            style: newType,
+                            options: ['select', 'multi', 'radio', 'checkboxes'].includes(newType)
+                              ? [tr('Opção 1'), tr('Opção 2')]
+                              : [],
+                          }),
+                        ])
+                      }
+                    >
+                      {tr('Adicionar campo')}
+                    </Btn>
+                  </div>
                 </>
               )}
               {topicTab === 'advanced' && (
@@ -491,14 +469,12 @@ export function TicketEditor({
             {tr('Salvar antes de publicar.')} {tr('Selecione o assunto e preencha o formulário.')}
           </p>
           {form.questions.map((q) => (
-            <Field label={q.label} key={q.id}>
-              <textarea
-                aria-label={q.label}
-                rows={q.style === 'short' ? 1 : 3}
-                placeholder={q.required ? '*' : ''}
-                maxLength={q.maxLength}
-              />
-            </Field>
+            <TicketFormField
+              key={q.id}
+              question={q}
+              value={previewAnswers[q.id] ?? ''}
+              onChange={(value) => setPreviewAnswers((a) => ({ ...a, [q.id]: value }))}
+            />
           ))}
         </Modal>
       )}

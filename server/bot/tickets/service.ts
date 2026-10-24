@@ -9,6 +9,7 @@ import {
   type TicketSettings,
 } from '../../../shared/tickets.js'
 import { tt } from '../../../shared/ticket-i18n.js'
+import { validAnswer } from '../../../shared/ticket-forms.js'
 import { TicketDiscord, type TicketActor } from './discord.js'
 export class TicketService {
   readonly repo: TicketRepository
@@ -166,9 +167,7 @@ export class TicketService {
       if (revision !== undefined && current !== revision) throw new AppError(409, 'revisionConflict')
       if (
         Object.keys(answers).some((id) => !topic.questions.some((q) => q.id === id)) ||
-        topic.questions.some(
-          (q) => (q.required && !answers[q.id]?.trim()) || (answers[q.id]?.length ?? 0) > q.maxLength,
-        )
+        topic.questions.some((q) => !validAnswer(q, answers[q.id]))
       )
         throw new AppError(400, 'invalidInput')
       const settings = this.repo.settings(guild).settings

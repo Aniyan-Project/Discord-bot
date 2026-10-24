@@ -8,10 +8,23 @@ O módulo de tickets tem uma seção própria no dashboard: visão geral, painé
 2. Escolha uma categoria, os cargos de suporte e, se necessário, os cargos que podem gerir os atendimentos pelo Discord. Você pode sobrescrever categoria e equipe por assunto.
    Os cargos também podem ser editados em **Tickets → Permissões e auditoria**: busque pelo nome, marque os cargos desejados e clique em **Salvar cargos**. Cada caixa aceita vários cargos; desmarque para remover e salve novamente.
 3. Se usar registros, escolha um **canal privado da equipe**. `@everyone` e cargos que não são de suporte/gestão não podem enxergá-lo, exceto permissões administrativas inerentes. Registros não contêm respostas, notas internas ou transcrições.
-4. Crie um painel, personalize clássico/Components V2, configure até cinco assuntos e até cinco perguntas por assunto. Perguntas podem ser curtas ou longas, obrigatórias ou opcionais e ter limite de caracteres.
+4. Crie um painel, personalize clássico/Components V2, configure até cinco assuntos e até cinco campos por assunto. No formulário, escolha o tipo em **Novo campo** e clique em **Adicionar campo**. Campos existentes também podem trocar de tipo.
 5. Salve o rascunho. Revise canal e formato antes de publicar. Testar um painel publicado cria um atendimento real; o dashboard pede a confirmação e as respostas. Em `DEMO_MODE`, todos os efeitos do Discord são simulados.
 
 O bot precisa de Ver canais, Enviar mensagens, Inserir links, Anexar arquivos, Ler histórico, Gerenciar canais e, para threads, Criar threads privadas, Enviar mensagens em threads e Gerenciar threads. O link de convite inclui essas permissões, sem solicitar Administrador. Para um bot já instalado, revise os cargos e as permissões de canal. O gestor também precisa conseguir ver o canal do painel e enviar mensagens nele.
+
+## Campos do formulário
+
+- **Texto curto ou longo:** exemplo de preenchimento, texto de ajuda e mínimo/máximo de caracteres (até 2.000).
+- **Seleção única:** menu com uma opção por resposta.
+- **Seleção múltipla:** menu com várias escolhas e limites de seleção.
+- **Botões de opção:** alternativas visíveis para uma única escolha (mínimo de duas opções).
+- **Caixas de seleção:** grupo de alternativas com mínimo/máximo de escolhas.
+- **Confirmação:** caixa individual de sim/não. Se obrigatória, o Discord exige a marcação antes de enviar.
+
+Defina até dez opções distintas por campo de escolha, uma por linha, com até 100 caracteres por opção. Todos os campos permitem texto de ajuda e podem ser obrigatórios ou opcionais. Os controles de ordenação movem os campos; a prévia permite experimentar os tipos. O limite total continua sendo cinco campos por formulário. Os tipos usam componentes nativos de modal do Discord, tanto em painéis clássicos quanto V2.
+
+Salve o rascunho e **republique o painel** para aplicar mudanças ao formulário no Discord. Publicações existentes continuam usando o formulário publicado anteriormente. Formulários antigos de texto seguem funcionando. Respostas são validadas no servidor antes da criação: opções inexistentes ou duplicadas, limites de seleção e confirmações obrigatórias são rejeitados. Seleções múltiplas são persistidas como arrays JSON dentro do valor da resposta e exibidas de forma legível no histórico e no ticket.
 
 ## Atendimento
 
@@ -55,8 +68,8 @@ Nenhuma migração envia painéis, abre tickets ou altera canais existentes auto
 
 ## Organização do código
 
-- `shared/tickets.ts`: schemas e contratos; `shared/ticket-i18n.ts`: traduções.
+- `shared/tickets.ts`: schemas e contratos; `shared/ticket-forms.ts`: tipos de campo e validação de respostas; `shared/ticket-i18n.ts`: traduções.
 - `server/tickets/repository.ts`: tabelas, revisões, criptografia, auditoria e retenção; `routes.ts`: HTTP autenticado e CSRF.
-- `server/bot/tickets/messages.ts`: mensagens clássicas/V2; `discord.ts`: operações do Discord; `service.ts`: regras e ciclo de vida; `interactions.ts`: botões e formulários.
+- `server/bot/tickets/messages.ts`: mensagens clássicas/V2; `discord.ts`: operações do Discord; `service.ts`: regras e ciclo de vida; `interactions.ts`: despacho de interações; `forms.ts`: construção e leitura dos modais nativos.
 - `server/bot/events/tickets.ts`: atividade e sincronização de exclusões.
 - `web/tickets/`: páginas e componentes do dashboard, carregados sob demanda.

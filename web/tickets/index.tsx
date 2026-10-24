@@ -27,6 +27,7 @@ import { TicketEditor } from './editor.js'
 import { TicketPreview } from './preview.js'
 import { TicketHistory } from './history.js'
 import { TicketSettingsPage, TicketRoleSettings } from './settings.js'
+import { TicketFormField } from './form-field.js'
 import './tickets.css'
 export function TicketsPage() {
   const { guildId } = useParams()
@@ -592,16 +593,12 @@ function OpeningModal({
         >
           <p>{topic.description}</p>
           {topic.questions.map((q) => (
-            <Field label={q.label} key={q.id}>
-              <textarea
-                aria-label={q.label}
-                rows={q.style === 'short' ? 1 : 3}
-                maxLength={q.maxLength}
-                required={q.required}
-                value={answers[q.id] ?? ''}
-                onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
-              />
-            </Field>
+            <TicketFormField
+              question={q}
+              key={q.id}
+              value={answers[q.id] ?? ''}
+              onChange={(value) => setAnswers((a) => ({ ...a, [q.id]: value }))}
+            />
           ))}
           {!view.messageId && <p className="small">{tr('Salvar antes de publicar.')}</p>}
           <div className="dialog-actions">

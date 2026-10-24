@@ -11,7 +11,9 @@ import type { TicketService } from './service.js'
 import { AppError } from '../../security.js'
 import { tt } from '../../../shared/ticket-i18n.js'
 import type { InteractionHandler } from '../handlers/types.js'
+import { openingForm, formAnswers } from './forms.js'
 const messages: Record<string, string> = {
+  invalidInput: 'Revise a resposta e os limites deste campo.',
   ticketLimit: 'Limite de tickets atingido. Aguarde um atendimento ser encerrado.',
   ticketCooldown: 'Aguarde antes de abrir outro atendimento.',
   ticketUncertain:
@@ -49,20 +51,7 @@ export function ticketInteractionHandler(service: TicketService): InteractionHan
             await i.editReply({ content: `${tr('Seu atendimento foi criado.')} <#${t.channelId}>` })
             return
           }
-          const modal = new ModalBuilder()
-            .setCustomId(`ticket:form:${id}:${topic.id}:${revision}`)
-            .setTitle(topic.name.slice(0, 45))
-          for (const q of topic.questions)
-            modal.addComponents(
-              new ActionRowBuilder<TextInputBuilder>().addComponents(
-                new TextInputBuilder()
-                  .setCustomId(q.id)
-                  .setLabel(q.label)
-                  .setStyle(q.style === 'short' ? TextInputStyle.Short : TextInputStyle.Paragraph)
-                  .setRequired(q.required)
-                  .setMaxLength(q.maxLength),
-              ),
-            )
+          const modal = openingForm(`ticket:form:${id}:${topic.id}:${revision}`, topic)
           await i.showModal(modal)
           return
         }
@@ -87,9 +76,7 @@ export function ticketInteractionHandler(service: TicketService): InteractionHan
         if (action === 'form' && i.isModalSubmit()) {
           if (!extra) throw new AppError(400, 'invalidInput')
           const { topic } = service.opening(guild, id, extra)
-          const answers = Object.fromEntries(
-            topic.questions.map((q) => [q.id, i.fields.getTextInputValue(q.id)]),
-          )
+          const answers = formAnswers(topic, i.fields)
           const t = await service.open(guild, user, id, extra, answers, Number(revision))
           await i.editReply({ content: `${tr('Seu atendimento foi criado.')} <#${t.channelId}>` })
           return

@@ -20,6 +20,7 @@ import type {
 } from '../../../shared/tickets.js'
 import { ticketVariables } from '../../../shared/tickets.js'
 import { tt } from '../../../shared/ticket-i18n.js'
+import { displayAnswer } from '../../../shared/ticket-forms.js'
 import { AppError } from '../../security.js'
 import { panelPayload, ticketControls } from './messages.js'
 export interface TicketActor {
@@ -290,7 +291,11 @@ export class TicketDiscord {
       allowedMentions: { parse: [], roles: ping ? roles : [] },
     })
     for (const q of t.topic.questions) {
-      const answer = t.answers[q.id]
+      const raw = t.answers[q.id]
+      const answer =
+        q.style === 'checkbox'
+          ? tt(t.settings.locale, raw === 'true' ? 'Sim' : 'Não')
+          : displayAnswer(q, raw ?? '')
       if (answer)
         await c.send({
           content: `**${escapeMarkdown(q.label)}**\n${answer}`.slice(0, 2000),

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { type TicketRecord, type Transcript, type TicketStatus } from '../../shared/tickets.js'
 import { ticketStatusText } from '../../shared/ticket-i18n.js'
+import { displayAnswer } from '../../shared/ticket-forms.js'
 import { useTickets } from './context.js'
 import { Btn, Input, Field, Modal, download } from './primitives.js'
 type Summary = Omit<TicketRecord, 'notes' | 'answers' | 'settings'> & { noteCount: number }
@@ -256,7 +257,19 @@ function TicketDetail({
             {Object.entries(t.answers).map(([id, answer]) => (
               <div className="answer" key={id}>
                 <strong>{t.topic.questions.find((q) => q.id === id)?.label}</strong>
-                <p>{answer}</p>
+                <p>
+                  {t.topic.questions.find((q) => q.id === id)?.style === 'checkbox'
+                    ? tr(
+                        displayAnswer(
+                          t.topic.questions.find((q) => q.id === id),
+                          answer,
+                        ),
+                      )
+                    : displayAnswer(
+                        t.topic.questions.find((q) => q.id === id),
+                        answer,
+                      )}
+                </p>
               </div>
             ))}
           </div>
